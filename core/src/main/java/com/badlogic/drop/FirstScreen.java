@@ -1,6 +1,7 @@
 package com.badlogic.drop;
           
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -8,72 +9,68 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.Input;
 
 public class FirstScreen implements Screen {
 
-    // --- Juego y lógica ---
     private FlowFreeJuego juego;
-
-    // --- Renderizado ---
     private ShapeRenderer shapeRenderer;
-    private SpriteBatch   batch;
-    private BitmapFont    font;
+    private SpriteBatch batch;
+    private BitmapFont font;
 
-    // --- Tamaño de cada celda y offset del tablero en pantalla ---
     private float tamCelda;
     private float offsetX;
     private float offsetY;
 
-    // --- Control de transición entre niveles ---
-    // Evita que avanzarNivel() se llame múltiples veces por frame
-    private boolean nivelAvanzado = false;
-    // Tiempo acumulado mostrando la pantalla de "¡NIVEL COMPLETADO!" (en segundos)
-    private float   tiempoVictoria = 0f;
-    private static final float DELAY_VICTORIA = 1.5f; // segundos antes de pasar al siguiente nivel
+    private float tiempoVictoria  = 0f;
+    private boolean esperandoAvance = false;
+    private static final float DELAY_VICTORIA = 3.0f; //*****************************
 
-    // --- Colores de cada índice ---
     private static final Color[] COLORES = {
-        Color.BLACK,        // 0 = VACIA
-        Color.RED,          // 1 = ROJO
-        Color.BLUE,         // 2 = AZUL
-        Color.GREEN,        // 3 = VERDE
-        Color.YELLOW,       // 4 = AMARILLO
-        Color.ORANGE,       // 5 = NARANJA
-        Color.PURPLE        // 6 = MORADO
+        Color.BLACK,
+        Color.RED,
+        Color.BLUE,
+        Color.GREEN,
+        Color.YELLOW,
+        Color.ORANGE,
+        Color.PURPLE
     };
 
     @Override
     public void show() {
-        juego         = new FlowFreeJuego(1);
+        juego = new FlowFreeJuego(1);
         shapeRenderer = new ShapeRenderer();
-        batch         = new SpriteBatch();
-        font          = new BitmapFont();
+        batch = new SpriteBatch();
+        font = new BitmapFont();
         font.setColor(Color.WHITE);
-
         calcularLayout();
         configurarInput();
     }
 
-    // ---------------------------------------------------------
-    // Calcular tamaño y posición del tablero en pantalla
-    // ---------------------------------------------------------
     private void calcularLayout() {
-        int    tamano    = juego.getNivel().getTamano();
-        float  areaJuego = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * 0.85f;
+        int tamano = juego.getNivel().getTamano();
+        float areaJuego = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) * 0.85f;
         tamCelda = areaJuego / tamano;
         offsetX  = (Gdx.graphics.getWidth()  - areaJuego) / 2f;
         offsetY  = (Gdx.graphics.getHeight() - areaJuego) / 2f;
     }
 
-    // ---------------------------------------------------------
-    // Input del mouse
-    // ---------------------------------------------------------
     private void configurarInput() {
         Gdx.input.setInputProcessor(new InputAdapter() {
-
             private int[] ultimaCelda = null;
 
+            //TECLADO
+            @Override
+            public boolean keyDown(int keycode) {
+                if (keycode == Input.Keys.R) {
+                    juego.reiniciar();
+                    // Resetear también el estado de transición de nivel
+                    esperandoAvance = false;
+                    tiempoVictoria  = 0f;
+                }
+                return true;
+            }
+
+            // MOUSE Y TOUCH 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 int[] celda = pixelACelda(screenX, screenY);
@@ -109,16 +106,13 @@ public class FirstScreen implements Screen {
 
     private int[] pixelACelda(int screenX, int screenY) {
         float worldY = Gdx.graphics.getHeight() - screenY;
-        int col  = (int) ((screenX - offsetX) / tamCelda);
-        int fila = (int) ((worldY  - offsetY) / tamCelda);
+        int col  = (int)((screenX - offsetX) / tamCelda);
+        int fila = (int)((worldY  - offsetY) / tamCelda);
         int tam  = juego.getNivel().getTamano();
         if (col < 0 || col >= tam || fila < 0 || fila >= tam) return null;
         return new int[]{ fila, col };
     }
 
-    // ---------------------------------------------------------
-    // Render
-    // ---------------------------------------------------------
     @Override
     public void render(float delta) {
         juego.actualizar();
@@ -129,33 +123,31 @@ public class FirstScreen implements Screen {
         dibujarTablero();
         dibujarHUD();
 
-        // --- Manejo de victoria: esperar DELAY_VICTORIA segundos y avanzar UNA sola vez ---
-        if (juego.isTerminado() && juego.isVictoria() && !nivelAvanzado) {
+        if (juego.isTerminado() && juego.isVictoria() && !esperandoAvance) {
+            esperandoAvance = true;
+            tiempoVictoria  = 0f;
+        }
+
+        if (esperandoAvance) {
             tiempoVictoria += delta;
             if (tiempoVictoria >= DELAY_VICTORIA) {
-                nivelAvanzado = true; // bloquear llamadas futuras
+                esperandoAvance = false;
+                tiempoVictoria  = 0f;
                 if (!juego.esUltimoNivel()) {
                     juego.avanzarNivel();
                     calcularLayout();
                     configurarInput();
                 }
-                // Resetear para el próximo nivel
-                tiempoVictoria = 0f;
-                nivelAvanzado  = false;
             }
         }
     }
 
-    // ---------------------------------------------------------
-    // Dibujar el tablero
-    // ---------------------------------------------------------
     private void dibujarTablero() {
         Tablero tablero = juego.getTablero();
         int     tamano  = juego.getNivel().getTamano();
         float   margen  = 3f;
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
         for (int f = 0; f < tamano; f++) {
             for (int c = 0; c < tamano; c++) {
                 Celda celda = tablero.getCelda(f, c);
@@ -163,88 +155,60 @@ public class FirstScreen implements Screen {
                 float y = offsetY + f * tamCelda;
 
                 shapeRenderer.setColor(0.2f, 0.2f, 0.2f, 1f);
-                shapeRenderer.rect(x + margen, y + margen,
-                                   tamCelda - margen * 2, tamCelda - margen * 2);
+                shapeRenderer.rect(x + margen, y + margen, tamCelda - margen*2, tamCelda - margen*2);
 
                 if (celda.getColor() != Celda.VACIA) {
-                    Color color = COLORES[celda.getColor()];
-                    shapeRenderer.setColor(color);
-
+                    shapeRenderer.setColor(COLORES[celda.getColor()]);
                     if (celda.isEsPunto()) {
-                        float radio = tamCelda * 0.35f;
-                        float cx = x + tamCelda / 2f;
-                        float cy = y + tamCelda / 2f;
-                        shapeRenderer.circle(cx, cy, radio, 32);
+                        shapeRenderer.circle(x + tamCelda/2f, y + tamCelda/2f, tamCelda*0.35f, 32);
                     } else {
                         float pad = tamCelda * 0.25f;
-                        shapeRenderer.rect(x + pad, y + pad,
-                                           tamCelda - pad * 2, tamCelda - pad * 2);
+                        shapeRenderer.rect(x + pad, y + pad, tamCelda - pad*2, tamCelda - pad*2);
                     }
                 }
             }
         }
-
         shapeRenderer.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(0.4f, 0.4f, 0.4f, 1f);
         for (int f = 0; f <= tamano; f++) {
             float y = offsetY + f * tamCelda;
-            shapeRenderer.line(offsetX, y, offsetX + tamano * tamCelda, y);
+            shapeRenderer.line(offsetX, y, offsetX + tamano*tamCelda, y);
         }
         for (int c = 0; c <= tamano; c++) {
             float x = offsetX + c * tamCelda;
-            shapeRenderer.line(x, offsetY, x, offsetY + tamano * tamCelda);
+            shapeRenderer.line(x, offsetY, x, offsetY + tamano*tamCelda);
         }
         shapeRenderer.end();
     }
 
-    // ---------------------------------------------------------
-    // HUD
-    // ---------------------------------------------------------
     private void dibujarHUD() {
         batch.begin();
-        font.draw(batch, "Nivel: "     + juego.getNivelNumero()
-                       + "  Tiempo: "  + juego.getTiempoRestante() + "s"
-                       + "  Intentos: " + juego.getIntentos(),
-                  10, Gdx.graphics.getHeight() - 10);
+        font.draw(batch,
+            "Nivel: " + juego.getNivelNumero()
+            + "  Tiempo: " + juego.getTiempoRestante() + "s"
+            + "  Intentos: " + juego.getIntentos()
+            + "  [R] Reiniciar",
+            10, Gdx.graphics.getHeight() - 10);
 
         if (juego.isTerminado()) {
             String msg = juego.isVictoria()
-                ? "¡NIVEL COMPLETADO!  Cargando siguiente..."
-                : "TIEMPO AGOTADO";
+                ? (juego.esUltimoNivel() ? "¡JUEGO COMPLETADO!" : "¡NIVEL COMPLETADO!")
+                : "TIEMPO AGOTADO  -  R para reiniciar";
             font.draw(batch, msg, offsetX, offsetY - 10);
         }
         batch.end();
     }
 
-    // ---------------------------------------------------------
-    // Ciclo de vida
-    // ---------------------------------------------------------
-    @Override
-    public void resize(int width, int height) {
-        if (width <= 0 || height <= 0) return;
-        calcularLayout();
+    @Override public void resize(int w, int h) { if (w > 0 && h > 0) calcularLayout(); }
+    @Override public void dispose(){ 
+        shapeRenderer.dispose(); batch.dispose(); font.dispose(); 
     }
-
-    @Override
-    public void dispose() {
-        shapeRenderer.dispose();
-        batch.dispose();
-        font.dispose();
+    @Override public void pause(){
     }
-    
-public void reiniciar(){
-    // Detectar tecla presionada
-if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-    juego.reiniciar();
-}
-
-
-}
-    
-   
-    @Override public void pause()  {}
-    @Override public void resume() {}
-    @Override public void hide()   {}
+    @Override public void resume(){
+    }
+    @Override public void hide(){
+    }
 }

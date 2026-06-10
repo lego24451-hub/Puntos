@@ -77,11 +77,19 @@ public class Nivel {
     // ------ NIVEL 2: 6x6, 4 colores, 50s ------
     // Mayor tablero, un color extra
     private static Nivel nivel2() {
+        // 6x6
+        // col: 0  1  2  3  4  5
+        // f=5: R  .  .  .  .  A
+        // f=4: .  .  V  .  .  .
+        // f=3: .  .  .  .  .  .
+        // f=2: .  .  V  .  .  .
+        // f=1: .  .  .  Y  .  .
+        // f=0: R  .  .  Y  .  A
         int[][] puntos = {
-            { Celda.ROJO,     0, 0, 5, 0 },
-            { Celda.AZUL,     0, 5, 5, 5 },
-            { Celda.VERDE,    1, 1, 4, 4 },
-            { Celda.AMARILLO, 0, 3, 5, 2 }
+            { Celda.ROJO,     5, 0, 0, 0 },
+            { Celda.AZUL,     5, 5, 0, 5 },
+            { Celda.VERDE,    4, 2, 2, 2 },
+            { Celda.AMARILLO, 1, 3, 0, 3 }
         };
         return new Nivel(2, 6, 50, "FÁCIL", puntos);
     }
