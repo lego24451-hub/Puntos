@@ -18,7 +18,7 @@ public class Usuarios implements Serializable {
     private LocalDateTime fechaRegistro,ultimaSesion;
     private int ranking;
     private ArrayList <String> amigos;
-    
+    private Estadisticas estadisticas;
     
     public Usuarios (String username, String contrasena, String nombreCompleto){
         this.username = username;
@@ -29,9 +29,13 @@ public class Usuarios implements Serializable {
         this.avatar = "default";
         this.ranking = 0;
         this.amigos = new ArrayList<>();
+        this.estadisticas = new Estadisticas();
         
         
-        
+    }
+
+    public Estadisticas getEstadisticas() {
+        return estadisticas;
     }
 
     public String getUsername() {
