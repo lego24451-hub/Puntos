@@ -1,4 +1,4 @@
-package com.badlogic.drop;
+package com.badlogic.drop.config;
 
 public class Celda {
 
@@ -10,6 +10,7 @@ public class Celda {
     public static final int AMARILLO = 4;
     public static final int NARANJA = 5;
     public static final int MORADO  = 6;
+    public static final int ROSA    = 7;
 
     private final int fila;
     private final int columna;

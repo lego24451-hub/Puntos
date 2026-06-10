@@ -1,4 +1,8 @@
-package com.badlogic.drop;
+package com.badlogic.drop.juego;
+
+import com.badlogic.drop.config.Celda;
+import com.badlogic.drop.config.Nivel;
+import com.badlogic.drop.config.Tablero;
 
 public class FlowFreeJuego {
 
@@ -56,7 +60,7 @@ public class FlowFreeJuego {
     }
 
     public boolean avanzarNivel() {
-        if (nivelActual >= 5) return false;
+        if (nivelActual >= 6) return false;
         nivelActual++;
         cargarNivel(nivelActual);
         return true;
@@ -131,6 +135,7 @@ public class FlowFreeJuego {
         return victoria; 
     }
     public boolean  esUltimoNivel(){ 
-        return nivelActual == 5; 
+        return nivelActual == 6; 
     }
+    
 }

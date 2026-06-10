@@ -1,4 +1,4 @@
-package com.badlogic.drop;
+package com.badlogic.drop.config;
 
 public class Tablero {
 
@@ -23,8 +23,8 @@ public class Tablero {
         this.pathActivo = new int[tamano * tamano][2];
         this.pathLongitud = 0;
         this.pathCerrado  = false;
-        this.puntosPorColor = new int[7][2][2];
-        this.colorConectado = new boolean[7];
+        this.puntosPorColor = new int[8][2][2];
+        this.colorConectado = new boolean[8];
         this.totalColores = nivel.getPuntos().length;
 
         inicializarGrid(nivel);
@@ -123,7 +123,7 @@ public class Tablero {
         return false;
     }
     private boolean esSegundoPunto(int fila, int columna) {
-        if (colorActivo <= 0 || colorActivo >= 7) return false;
+        if (colorActivo <= 0 || colorActivo >= 8) return false;
         Celda celda = grid[fila][columna];
         if (!celda.isEsPunto()) return false;
 
@@ -156,7 +156,7 @@ public class Tablero {
     }
 
     private boolean todosColoresConectados() {
-        for (int color = 1; color < 7; color++) {
+        for (int color = 1; color < 8; color++) {
             if (colorTienePuntos(color) && !colorConectado[color]) return false;
         }
         return true;
@@ -185,7 +185,7 @@ public class Tablero {
         colorActivo = Celda.VACIA;
         pathLongitud = 0;
         pathCerrado = false;
-        colorConectado = new boolean[7];
+        colorConectado = new boolean[8];
     }
     public int getTamano(){ 
         return tamano; }

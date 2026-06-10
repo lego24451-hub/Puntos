@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "workspace": {
+    "name": "PRO",
+    "createdAt": 1781216121200,
+    "preset": "starter"
+  },
+  "authorizedRoots": [
+    "C:\\Users\\spodi\\OneDrive\\Documentos\\PROYECTO\\PRO"
+  ],
+  "reload": null
+}

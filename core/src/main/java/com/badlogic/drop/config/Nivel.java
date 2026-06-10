@@ -1,4 +1,4 @@
-package com.badlogic.drop;
+package com.badlogic.drop.config;
 
 public class Nivel {
 
@@ -25,6 +25,7 @@ public class Nivel {
             case 3: return nivel3();
             case 4: return nivel4();
             case 5: return nivel5();
+            case 6: return nivel6();
             default: throw new IllegalArgumentException("Nivel " + numero + " no existe.");
         }
     }
@@ -47,36 +48,48 @@ public class Nivel {
         };
         return new Nivel(2, 6, 50, "FÁCIL", puntos);
     }
-    private static Nivel nivel3() {
-        int[][] puntos = {
-            { Celda.ROJO,     0, 0, 6, 6 },
-            { Celda.AZUL,     0, 6, 6, 0 },
-            { Celda.VERDE,    0, 3, 6, 3 },
-            { Celda.AMARILLO, 3, 0, 3, 6 },
-            { Celda.NARANJA,  1, 1, 5, 5 }
-        };
-        return new Nivel(3, 7, 40, "MEDIO", puntos);
-    }
+  private static Nivel nivel3() {
+    int[][] puntos = {
+        { Celda.ROJO,     0, 0, 3, 3 },
+        { Celda.AZUL,     0, 6, 2, 6 }, 
+        { Celda.VERDE,    0, 3, 3, 4 }, 
+        { Celda.AMARILLO, 6, 0, 4, 2 },
+        { Celda.NARANJA,  6, 6, 4, 4 }
+    };
+    return new Nivel(3, 7, 40, "MEDIO", puntos);
+}
     private static Nivel nivel4() {
-        int[][] puntos = {
-            { Celda.ROJO,     0, 0, 7, 7 },
-            { Celda.AZUL,     0, 7, 7, 0 },
-            { Celda.VERDE,    0, 4, 7, 3 },
-            { Celda.AMARILLO, 2, 0, 5, 7 },
-            { Celda.NARANJA,  1, 2, 6, 5 }
-        };
-        return new Nivel(4, 8, 30, "DIFÍCIL", puntos);
-    }
+    int[][] puntos = {
+        { Celda.ROJO,     0, 0, 0, 7 },     
+        { Celda.AZUL,     7, 0, 7, 7 },     
+        { Celda.VERDE,    1, 0, 6, 0 },     
+        { Celda.AMARILLO, 1, 7, 6, 7 },     
+        { Celda.NARANJA,  3, 3, 4, 4 }      
+    };
+    return new Nivel(4, 8, 45, "DIFÍCIL", puntos);
+}
     private static Nivel nivel5() {
         int[][] puntos = {
-            { Celda.ROJO,     0, 0, 8, 8 },
-            { Celda.AZUL,     0, 8, 8, 0 },
-            { Celda.VERDE,    0, 4, 8, 4 },
-            { Celda.AMARILLO, 4, 0, 4, 8 },
-            { Celda.NARANJA,  1, 1, 7, 7 },
-            { Celda.MORADO,   2, 6, 6, 2 }
+            { Celda.ROJO,     0, 0, 0, 8 },      // fila superior
+            { Celda.AZUL,     8, 0, 8, 8 },      // fila inferior
+            { Celda.VERDE,    1, 0, 7, 0 },      // columna izquierda
+            { Celda.AMARILLO, 1, 8, 7, 8 },      // columna derecha
+            { Celda.NARANJA,  2, 1, 2, 7 },      // fila 2 horizontal
+            { Celda.MORADO,   6, 1, 6, 7 }       // fila 6 horizontal
         };
-        return new Nivel(5, 9, 20, "MUY DIFÍCIL", puntos);
+        return new Nivel(5, 9, 35, "MUY DIFÍCIL", puntos);
+    }
+    private static Nivel nivel6() {
+        int[][] puntos = {
+            { Celda.ROJO,     0, 0, 0, 9 },      // fila superior
+            { Celda.AZUL,     9, 0, 9, 9 },      // fila inferior
+            { Celda.VERDE,    1, 0, 8, 0 },      // columna izquierda
+            { Celda.AMARILLO, 1, 9, 8, 9 },      // columna derecha
+            { Celda.NARANJA,  2, 2, 2, 7 },      // fila 2 horizontal
+            { Celda.MORADO,   7, 2, 7, 7 },      // fila 7 horizontal
+            { Celda.ROSA,     4, 1, 4, 8 }       // fila 4 horizontal (centro)
+        };
+        return new Nivel(6, 10, 30, "EXTREMO", puntos);
     }
 
     public int getNumero(){ 
