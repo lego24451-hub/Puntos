@@ -1,132 +1,106 @@
 package com.badlogic.drop;
 
-/**
- * Representa el tablero NxN del Flow Free.
- *
- * Responsabilidades:
- *  - Inicializar el grid a partir de un Nivel
- *  - Gestionar el camino (path) activo que dibuja el jugador
- *  - Limpiar caminos cuando el jugador los pisa con otro color
- *  - Verificar si el tablero está completamente resuelto
- */
 public class Tablero {
 
-    // ---------------------------------------------------------
-    // Atributos
-    // ---------------------------------------------------------
-    private final int      tamano;
+    private final int       tamano;
     private final Celda[][] grid;
 
-    // Path activo: color que se está arrastrando y su recorrido
     private int      colorActivo;
-    private int[][]  pathActivo;   // lista de [fila, col] del camino actual
-    private int      pathLongitud; // cuántas celdas lleva el path activo
+    private int[][]  pathActivo;
+    private int      pathLongitud;
+    private boolean  pathCerrado;
+
+    // Posiciones de los dos puntos de cada color [color][puntoAoB][filaOcol]
+    private int[][][] puntosPorColor;
+    // true cuando el path de ese color conecta ambos puntos
+    private boolean[] colorConectado;
+    // cuántos colores tiene este nivel
+    private int       totalColores;
 
     // ---------------------------------------------------------
-    // Constructor
-    // ---------------------------------------------------------
     public Tablero(Nivel nivel) {
-        this.tamano       = nivel.getTamano();
-        this.grid         = new Celda[tamano][tamano];
-        this.colorActivo  = Celda.VACIA;
-        this.pathActivo   = new int[tamano * tamano][2]; // máximo posible
-        this.pathLongitud = 0;
+        this.tamano         = nivel.getTamano();
+        this.grid           = new Celda[tamano][tamano];
+        this.colorActivo    = Celda.VACIA;
+        this.pathActivo     = new int[tamano * tamano][2];
+        this.pathLongitud   = 0;
+        this.pathCerrado    = false;
+        this.puntosPorColor = new int[7][2][2];
+        this.colorConectado = new boolean[7];
+        this.totalColores   = nivel.getPuntos().length;
 
         inicializarGrid(nivel);
     }
 
-    // ---------------------------------------------------------
-    // Inicialización
-    // ---------------------------------------------------------
-
-    /** Crea todas las celdas vacías y coloca los puntos del nivel. */
     private void inicializarGrid(Nivel nivel) {
-        // Crear celdas vacías
-        for (int f = 0; f < tamano; f++) {
-            for (int c = 0; c < tamano; c++) {
+        for (int f = 0; f < tamano; f++)
+            for (int c = 0; c < tamano; c++)
                 grid[f][c] = new Celda(f, c);
-            }
-        }
 
-        // Colocar puntos fijos del nivel: { color, f1, c1, f2, c2 }
         for (int[] punto : nivel.getPuntos()) {
             int color = punto[0];
             grid[punto[1]][punto[2]].marcarComoPunto(color);
             grid[punto[3]][punto[4]].marcarComoPunto(color);
+            puntosPorColor[color][0][0] = punto[1];
+            puntosPorColor[color][0][1] = punto[2];
+            puntosPorColor[color][1][0] = punto[3];
+            puntosPorColor[color][1][1] = punto[4];
         }
     }
 
     // ---------------------------------------------------------
-    // Lógica del drag
-    // ---------------------------------------------------------
-
-    /**
-     * El jugador presiona sobre una celda.
-     * Si es un punto de color, inicia el path con ese color.
-     * Si la celda ya tiene un color (no punto), continúa ese path desde aquí.
-     */
     public void iniciarPath(int fila, int columna) {
         Celda celda = getCelda(fila, columna);
-        if (celda == null) return;
-
-        // Solo se puede iniciar desde una celda con color
-        if (celda.getColor() == Celda.VACIA) return;
+        if (celda == null || celda.getColor() == Celda.VACIA) return;
 
         colorActivo  = celda.getColor();
         pathLongitud = 0;
+        pathCerrado  = false;
+        colorConectado[colorActivo] = false;
 
-        // Limpiar el camino anterior de ese color (no los puntos)
         limpiarCaminoDeColor(colorActivo);
-
-        // Agregar la celda de inicio al path
-        agregarAlPath(fila, columna);
-        celda.setColor(colorActivo); // restaurar color si se limpió
-    }
-
-    /**
-     * El jugador arrastra hacia una nueva celda.
-     * Agrega la celda al path si el movimiento es válido.
-     */
-    public void extenderPath(int fila, int columna) {
-        if (colorActivo == Celda.VACIA) return;
-        Celda celda = getCelda(fila, columna);
-        if (celda == null) return;
-
-        // No retroceder a la celda anterior del path
-        if (esPenultimaCelda(fila, columna)) {
-            // El usuario retrocedió: quitar la última celda del path
-            retrocederPath();
-            return;
-        }
-
-        // No pisar celdas ya en el path actual
-        if (estaEnPathActivo(fila, columna)) return;
-
-        // Si la celda tiene un color diferente y no es punto, limpiarla
-        if (celda.getColor() != Celda.VACIA
-                && celda.getColor() != colorActivo
-                && !celda.isEsPunto()) {
-            limpiarCaminoDeColor(celda.getColor());
-        }
-
-        // No pasar sobre un punto de otro color
-        if (celda.isEsPunto() && celda.getColor() != colorActivo) return;
-
-        // Agregar la celda al path
         agregarAlPath(fila, columna);
         celda.setColor(colorActivo);
     }
 
-    /** El jugador soltó el mouse: se termina el path activo. */
+    public void extenderPath(int fila, int columna) {
+        if (colorActivo == Celda.VACIA || pathCerrado) return;
+        Celda celda = getCelda(fila, columna);
+        if (celda == null) return;
+
+        if (esPenultimaCelda(fila, columna)) {
+            retrocederPath();
+            return;
+        }
+
+        if (estaEnPathActivo(fila, columna)) return;
+
+        if (celda.getColor() != Celda.VACIA
+                && celda.getColor() != colorActivo
+                && !celda.isEsPunto()) {
+            colorConectado[celda.getColor()] = false;
+            limpiarCaminoDeColor(celda.getColor());
+        }
+
+        if (celda.isEsPunto() && celda.getColor() != colorActivo) return;
+
+        agregarAlPath(fila, columna);
+        celda.setColor(colorActivo);
+
+        // ¿Llegamos al segundo punto de este color?
+        if (esSegundoPunto(fila, columna)) {
+            colorConectado[colorActivo] = true;
+            pathCerrado = true;
+        }
+    }
+
     public void terminarPath() {
         colorActivo  = Celda.VACIA;
         pathLongitud = 0;
+        pathCerrado  = false;
     }
 
     // ---------------------------------------------------------
-    // Helpers del path
-    // ---------------------------------------------------------
-
     private void agregarAlPath(int fila, int columna) {
         pathActivo[pathLongitud][0] = fila;
         pathActivo[pathLongitud][1] = columna;
@@ -140,6 +114,8 @@ public class Tablero {
         Celda celda = grid[f][c];
         if (!celda.isEsPunto()) celda.limpiar();
         pathLongitud--;
+        colorConectado[colorActivo] = false;
+        pathCerrado = false;
     }
 
     private boolean esPenultimaCelda(int fila, int columna) {
@@ -149,76 +125,88 @@ public class Tablero {
     }
 
     private boolean estaEnPathActivo(int fila, int columna) {
-        for (int i = 0; i < pathLongitud; i++) {
+        for (int i = 0; i < pathLongitud; i++)
             if (pathActivo[i][0] == fila && pathActivo[i][1] == columna) return true;
-        }
         return false;
     }
 
-    /** Limpia todas las celdas de un color que NO sean puntos fijos. */
+    private boolean esSegundoPunto(int fila, int columna) {
+        if (colorActivo <= 0 || colorActivo >= 7) return false;
+        Celda celda = grid[fila][columna];
+        if (!celda.isEsPunto()) return false;
+
+        int inicioF = pathActivo[0][0];
+        int inicioC = pathActivo[0][1];
+        boolean esInicio = (fila == inicioF && columna == inicioC);
+        if (esInicio) return false;
+
+        int pA0 = puntosPorColor[colorActivo][0][0], pA1 = puntosPorColor[colorActivo][0][1];
+        int pB0 = puntosPorColor[colorActivo][1][0], pB1 = puntosPorColor[colorActivo][1][1];
+        return (fila == pA0 && columna == pA1) || (fila == pB0 && columna == pB1);
+    }
+
     private void limpiarCaminoDeColor(int color) {
-        for (int f = 0; f < tamano; f++) {
-            for (int c = 0; c < tamano; c++) {
-                if (grid[f][c].getColor() == color && !grid[f][c].isEsPunto()) {
+        for (int f = 0; f < tamano; f++)
+            for (int c = 0; c < tamano; c++)
+                if (grid[f][c].getColor() == color && !grid[f][c].isEsPunto())
                     grid[f][c].limpiar();
-                }
-            }
-        }
     }
 
     // ---------------------------------------------------------
-    // Validación de victoria
-    // ---------------------------------------------------------
-
-    /**
-     * El tablero está resuelto cuando:
-     *  1. Ninguna celda está vacía (todas tienen algún color)
-     *  2. Todos los puntos de inicio están conectados con sus puntos de fin
-     */
+    // Victoria: todas las celdas ocupadas Y todos los colores conectados
     public boolean estaResuelto() {
-        return todasCeldasOcupadas();
-        // La condición de conexión se garantiza por la mecánica del drag:
-        // solo se puede completar un color si el path llega al punto de fin.
+        if (!todasCeldasOcupadas()) return false;
+        return todosColoresConectados();
     }
 
     private boolean todasCeldasOcupadas() {
-        for (int f = 0; f < tamano; f++) {
-            for (int c = 0; c < tamano; c++) {
+        for (int f = 0; f < tamano; f++)
+            for (int c = 0; c < tamano; c++)
                 if (!grid[f][c].isOcupada()) return false;
-            }
+        return true;
+    }
+
+    private boolean todosColoresConectados() {
+        for (int color = 1; color < 7; color++) {
+            if (colorTienePuntos(color) && !colorConectado[color]) return false;
         }
         return true;
     }
 
-    // ---------------------------------------------------------
-    // Reset del tablero
-    // ---------------------------------------------------------
+    private boolean colorTienePuntos(int color) {
+        for (int f = 0; f < tamano; f++)
+            for (int c = 0; c < tamano; c++)
+                if (grid[f][c].isEsPunto() && grid[f][c].getColor() == color) return true;
+        return false;
+    }
 
-    /** Limpia todos los caminos pero conserva los puntos fijos del nivel. */
+    // ---------------------------------------------------------
     public void resetear(Nivel nivel) {
-        for (int f = 0; f < tamano; f++) {
-            for (int c = 0; c < tamano; c++) {
+        for (int f = 0; f < tamano; f++)
+            for (int c = 0; c < tamano; c++)
                 grid[f][c].limpiar();
-            }
-        }
-        // Restaurar puntos fijos
+
         for (int[] punto : nivel.getPuntos()) {
             int color = punto[0];
             grid[punto[1]][punto[2]].marcarComoPunto(color);
             grid[punto[3]][punto[4]].marcarComoPunto(color);
+            puntosPorColor[color][0][0] = punto[1];
+            puntosPorColor[color][0][1] = punto[2];
+            puntosPorColor[color][1][0] = punto[3];
+            puntosPorColor[color][1][1] = punto[4];
         }
-        colorActivo  = Celda.VACIA;
-        pathLongitud = 0;
+        colorActivo     = Celda.VACIA;
+        pathLongitud    = 0;
+        pathCerrado     = false;
+        colorConectado  = new boolean[7];
     }
 
     // ---------------------------------------------------------
-    // Getters
-    // ---------------------------------------------------------
-    public int    getTamano()               { return tamano; }
-    public Celda  getCelda(int f, int c)    {
+    public int      getTamano()            { return tamano; }
+    public Celda    getCelda(int f, int c) {
         if (f < 0 || f >= tamano || c < 0 || c >= tamano) return null;
         return grid[f][c];
     }
-    public int    getColorActivo()          { return colorActivo; }
-    public Celda[][] getGrid()              { return grid; }
+    public int      getColorActivo()       { return colorActivo; }
+    public Celda[][] getGrid()             { return grid; }
 }
