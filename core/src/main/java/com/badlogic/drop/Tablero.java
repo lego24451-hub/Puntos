@@ -2,32 +2,30 @@ package com.badlogic.drop;
 
 public class Tablero {
 
-    private final int       tamano;
+    private final int tamano;
     private final Celda[][] grid;
 
-    private int      colorActivo;
+    private int colorActivo;
     private int[][]  pathActivo;
-    private int      pathLongitud;
-    private boolean  pathCerrado;
+    private int pathLongitud;
+    private boolean pathCerrado;
 
-    // Posiciones de los dos puntos de cada color [color][puntoAoB][filaOcol]
     private int[][][] puntosPorColor;
-    // true cuando el path de ese color conecta ambos puntos
+   
     private boolean[] colorConectado;
-    // cuántos colores tiene este nivel
-    private int       totalColores;
+    
+    private int totalColores;
 
-    // ---------------------------------------------------------
     public Tablero(Nivel nivel) {
-        this.tamano         = nivel.getTamano();
-        this.grid           = new Celda[tamano][tamano];
-        this.colorActivo    = Celda.VACIA;
-        this.pathActivo     = new int[tamano * tamano][2];
-        this.pathLongitud   = 0;
-        this.pathCerrado    = false;
+        this.tamano = nivel.getTamano();
+        this.grid = new Celda[tamano][tamano];
+        this.colorActivo = Celda.VACIA;
+        this.pathActivo = new int[tamano * tamano][2];
+        this.pathLongitud = 0;
+        this.pathCerrado  = false;
         this.puntosPorColor = new int[7][2][2];
         this.colorConectado = new boolean[7];
-        this.totalColores   = nivel.getPuntos().length;
+        this.totalColores = nivel.getPuntos().length;
 
         inicializarGrid(nivel);
     }
@@ -47,8 +45,6 @@ public class Tablero {
             puntosPorColor[color][1][1] = punto[4];
         }
     }
-
-    // ---------------------------------------------------------
     public void iniciarPath(int fila, int columna) {
         Celda celda = getCelda(fila, columna);
         if (celda == null || celda.getColor() == Celda.VACIA) return;
@@ -87,7 +83,6 @@ public class Tablero {
         agregarAlPath(fila, columna);
         celda.setColor(colorActivo);
 
-        // ¿Llegamos al segundo punto de este color?
         if (esSegundoPunto(fila, columna)) {
             colorConectado[colorActivo] = true;
             pathCerrado = true;
@@ -99,8 +94,6 @@ public class Tablero {
         pathLongitud = 0;
         pathCerrado  = false;
     }
-
-    // ---------------------------------------------------------
     private void agregarAlPath(int fila, int columna) {
         pathActivo[pathLongitud][0] = fila;
         pathActivo[pathLongitud][1] = columna;
@@ -129,7 +122,6 @@ public class Tablero {
             if (pathActivo[i][0] == fila && pathActivo[i][1] == columna) return true;
         return false;
     }
-
     private boolean esSegundoPunto(int fila, int columna) {
         if (colorActivo <= 0 || colorActivo >= 7) return false;
         Celda celda = grid[fila][columna];
@@ -151,9 +143,6 @@ public class Tablero {
                 if (grid[f][c].getColor() == color && !grid[f][c].isEsPunto())
                     grid[f][c].limpiar();
     }
-
-    // ---------------------------------------------------------
-    // Victoria: todas las celdas ocupadas Y todos los colores conectados
     public boolean estaResuelto() {
         if (!todasCeldasOcupadas()) return false;
         return todosColoresConectados();
@@ -179,8 +168,6 @@ public class Tablero {
                 if (grid[f][c].isEsPunto() && grid[f][c].getColor() == color) return true;
         return false;
     }
-
-    // ---------------------------------------------------------
     public void resetear(Nivel nivel) {
         for (int f = 0; f < tamano; f++)
             for (int c = 0; c < tamano; c++)
@@ -195,18 +182,21 @@ public class Tablero {
             puntosPorColor[color][1][0] = punto[3];
             puntosPorColor[color][1][1] = punto[4];
         }
-        colorActivo     = Celda.VACIA;
-        pathLongitud    = 0;
-        pathCerrado     = false;
-        colorConectado  = new boolean[7];
+        colorActivo = Celda.VACIA;
+        pathLongitud = 0;
+        pathCerrado = false;
+        colorConectado = new boolean[7];
     }
-
-    // ---------------------------------------------------------
-    public int      getTamano()            { return tamano; }
+    public int getTamano(){ 
+        return tamano; }
     public Celda    getCelda(int f, int c) {
         if (f < 0 || f >= tamano || c < 0 || c >= tamano) return null;
         return grid[f][c];
     }
-    public int      getColorActivo()       { return colorActivo; }
-    public Celda[][] getGrid()             { return grid; }
+    public int getColorActivo(){ 
+        return colorActivo; 
+    }
+    public Celda[][] getGrid(){ 
+        return grid; 
+    }
 }

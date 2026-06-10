@@ -1,29 +1,7 @@
 package com.badlogic.drop;
 
-/**
- * Define un nivel del juego Flow Free.
- *
- * Cada nivel tiene:
- *  - Un tamaño de tablero (NxN)
- *  - Un conjunto de puntos de inicio y fin por color
- *  - Un nivel de dificultad
- *  - Un tiempo límite en segundos (más alto = más fácil)
- *
- * Los puntos se definen como arreglos de:
- *  { color, fila_inicio, col_inicio, fila_fin, col_fin }
- *
- * Dificultad progresiva:
- *  Nivel 1 → 5x5,  3 colores, 60s  (MUY FÁCIL)
- *  Nivel 2 → 6x6,  4 colores, 50s  (FÁCIL)
- *  Nivel 3 → 7x7,  5 colores, 40s  (MEDIO)
- *  Nivel 4 → 8x8,  5 colores, 30s  (DIFÍCIL)
- *  Nivel 5 → 9x9,  6 colores, 20s  (MUY DIFÍCIL)
- */
 public class Nivel {
 
-    // ---------------------------------------------------------
-    // Atributos
-    // ---------------------------------------------------------
     private final int    numero;
     private final int    tamano;        // tamaño del grid NxN
     private final int    tiempoLimite;  // en segundos
@@ -31,9 +9,6 @@ public class Nivel {
     private final int[][] puntos;       // { color, f1, c1, f2, c2 }
     private boolean       completado;
 
-    // ---------------------------------------------------------
-    // Constructor
-    // ---------------------------------------------------------
     public Nivel(int numero, int tamano, int tiempoLimite, String dificultad, int[][] puntos) {
         this.numero       = numero;
         this.tamano       = tamano;
@@ -42,10 +17,6 @@ public class Nivel {
         this.puntos       = puntos;
         this.completado   = false;
     }
-
-    // ---------------------------------------------------------
-    // Niveles predefinidos (fábrica estática)
-    // ---------------------------------------------------------
 
     public static Nivel getNivel(int numero) {
         switch (numero) {
@@ -58,13 +29,6 @@ public class Nivel {
         }
     }
 
-    // ------ NIVEL 1: 5x5, 3 colores, 60s ------
-    // Tablero visual:
-    //   . . . . .
-    //   R . . . .
-    //   . . A . .
-    //   . . . . B
-    //   R . A . B
     private static Nivel nivel1() {
         int[][] puntos = {
             { Celda.ROJO,     1, 0, 4, 0 },
@@ -73,18 +37,8 @@ public class Nivel {
         };
         return new Nivel(1, 5, 60, "MUY FÁCIL", puntos);
     }
-
-    // ------ NIVEL 2: 6x6, 4 colores, 50s ------
-    // Mayor tablero, un color extra
     private static Nivel nivel2() {
-        // 6x6
-        // col: 0  1  2  3  4  5
-        // f=5: R  .  .  .  .  A
-        // f=4: .  .  V  .  .  .
-        // f=3: .  .  .  .  .  .
-        // f=2: .  .  V  .  .  .
-        // f=1: .  .  .  Y  .  .
-        // f=0: R  .  .  Y  .  A
+   
         int[][] puntos = {
             { Celda.ROJO,     5, 0, 0, 0 },
             { Celda.AZUL,     5, 5, 0, 5 },
@@ -93,8 +47,6 @@ public class Nivel {
         };
         return new Nivel(2, 6, 50, "FÁCIL", puntos);
     }
-
-    // ------ NIVEL 3: 7x7, 5 colores, 40s ------
     private static Nivel nivel3() {
         int[][] puntos = {
             { Celda.ROJO,     0, 0, 6, 6 },
@@ -105,8 +57,6 @@ public class Nivel {
         };
         return new Nivel(3, 7, 40, "MEDIO", puntos);
     }
-
-    // ------ NIVEL 4: 8x8, 5 colores, 30s ------
     private static Nivel nivel4() {
         int[][] puntos = {
             { Celda.ROJO,     0, 0, 7, 7 },
@@ -117,8 +67,6 @@ public class Nivel {
         };
         return new Nivel(4, 8, 30, "DIFÍCIL", puntos);
     }
-
-    // ------ NIVEL 5: 9x9, 6 colores, 20s ------
     private static Nivel nivel5() {
         int[][] puntos = {
             { Celda.ROJO,     0, 0, 8, 8 },
@@ -131,14 +79,25 @@ public class Nivel {
         return new Nivel(5, 9, 20, "MUY DIFÍCIL", puntos);
     }
 
-    // ---------------------------------------------------------
-    // Getters
-    // ---------------------------------------------------------
-    public int     getNumero()       { return numero; }
-    public int     getTamano()       { return tamano; }
-    public int     getTiempoLimite() { return tiempoLimite; }
-    public String  getDificultad()   { return dificultad; }
-    public int[][] getPuntos()       { return puntos; }
-    public boolean isCompletado()    { return completado; }
-    public void    setCompletado(boolean completado) { this.completado = completado; }
+    public int getNumero(){ 
+        return numero; 
+    }
+    public int getTamano(){ 
+        return tamano; 
+    }
+    public int getTiempoLimite() { 
+        return tiempoLimite; 
+    }
+    public String  getDificultad(){ 
+        return dificultad; 
+    }
+    public int[][] getPuntos(){ 
+        return puntos; 
+    }
+    public boolean isCompletado(){ 
+        return completado; 
+    }
+    public void setCompletado(boolean completado) 
+    { this.completado = completado; 
+    }
 }
