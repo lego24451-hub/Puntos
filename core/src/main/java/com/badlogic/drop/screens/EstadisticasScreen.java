@@ -53,6 +53,8 @@ public class EstadisticasScreen implements Screen {
 
         Label separador = new Label("─────────────────", skin);
         separador.setColor(Color.LIGHT_GRAY);
+        Label separador2 = new Label("─────────────────", skin);
+        separador2.setColor(Color.LIGHT_GRAY);
 
         // Datos generales
         Label lblPartidas  = new Label("Partidas jugadas:       " + stats.getPartidasJugadas(), skin);
@@ -75,6 +77,21 @@ public class EstadisticasScreen implements Screen {
             }
         }
 
+        // Mejor puntaje por nivel
+        Label lblMejoresPuntajes = new Label("Mejor puntaje por nivel:", skin);
+        lblMejoresPuntajes.setColor(new Color(0.32f, 0.29f, 0.72f, 1f));
+
+        Table tablaPuntajes = new Table();
+        HashMap<Integer, Integer> puntajes = stats.getPuntajeMaximoPorNivel();
+        if (puntajes == null || puntajes.isEmpty()) {
+            tablaPuntajes.add(new Label("  Sin registros aún.", skin)).left().row();
+        } else {
+            for (Map.Entry<Integer, Integer> entrada : puntajes.entrySet()) {
+                String fila = "  Nivel " + entrada.getKey() + ":  " + entrada.getValue() + " pts";
+                tablaPuntajes.add(new Label(fila, skin)).left().padBottom(3).row();
+            }
+        }
+
         // Layout
         tabla.add(titulo).padBottom(4).row();
         tabla.add(subUsuario).padBottom(20).row();
@@ -85,7 +102,10 @@ public class EstadisticasScreen implements Screen {
         tabla.add(lblRanking).left().padBottom(20).row();
         tabla.add(separador).padBottom(12).row();
         tabla.add(lblMejoresTiempos).left().padBottom(8).row();
-        tabla.add(tablaTiempos).left().padBottom(25).row();
+        tabla.add(tablaTiempos).left().padBottom(15).row();
+        tabla.add(separador2).padBottom(12).row();
+        tabla.add(lblMejoresPuntajes).left().padBottom(8).row();
+        tabla.add(tablaPuntajes).left().padBottom(25).row();
 
         // Botón volver
         TextButton btnVolver = new TextButton("← Volver al menú", skin);

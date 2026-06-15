@@ -19,6 +19,7 @@ public class FlowFreeJuego {
     private long tiempoPausa;        
 
     private boolean  victoria;
+    private int      puntaje;
 
     public FlowFreeJuego(int nivelInicial) {
         this.nivelActual = nivelInicial;
@@ -40,14 +41,12 @@ public class FlowFreeJuego {
 
         tiempoTranscurrido = System.currentTimeMillis() - tiempoInicio;
 
-        if (getTiempoRestante() <= 0) {
-            terminado = true;
-            victoria  = false;
-        }
+        // Victoria: tablero lleno y todos los colores conectados
         if (tablero.estaResuelto()) {
             terminado = true;
             victoria  = true;
             nivel.setCompletado(true);
+            calcularPuntaje();
         }
     }
     public void reiniciar() {
@@ -105,8 +104,8 @@ public class FlowFreeJuego {
     }
     
     public int getTiempoRestante() {
-        int transcurrido = (int)(tiempoTranscurrido / 1000);
-        return nivel.getTiempoLimite() - transcurrido;
+        // Ahora es un cronómetro normal (count-up)
+        return getTiempoTranscurridoSeg();
     }
 
     public int getTiempoTranscurridoSeg() {
@@ -136,6 +135,22 @@ public class FlowFreeJuego {
     }
     public boolean  esUltimoNivel(){ 
         return nivelActual == 6; 
+    }
+
+    /** Calcula el puntaje basado en el tiempo: menos tiempo = más puntos */
+    private void calcularPuntaje() {
+        int tiempoSeg = getTiempoTranscurridoSeg();
+        if (tiempoSeg < 1) tiempoSeg = 1;
+
+        int tiempoLimite = nivel.getTiempoLimite();
+        int nivelNum = nivel.getNumero();
+
+        // Fórmula: (tiempoLímite × 100) / tiempoSeg + bonus por dificultad
+        puntaje = (tiempoLimite * 100) / tiempoSeg + (nivelNum * 10);
+    }
+
+    public int getPuntaje() {
+        return puntaje;
     }
     
 }

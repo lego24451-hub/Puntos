@@ -57,5 +57,28 @@ public static String hashContrasena (String contrasena){
     }
 }
 
+public static Usuarios[] cargarTodosLosUsarios(){
+    File carpeta = new File (RUTA_BASE);
+    File[] carpetas = carpeta.listFiles();
+    if (carpetas == null)
+        return new Usuarios[0];
+    
+    int count = 0;
+    for (int i = 0; i < carpetas.length; i++){
+        if (carpetas[i].isDirectory()){
+            count++;
+        }
+    }
+    
+    Usuarios[] lista = new Usuarios[count];
+    int index = 0;
+    for (int i = 0; i < carpetas.length; i++){
+        if (carpetas[i].isDirectory()){
+            lista[index] = cargarUsuario(carpetas[i].getName());
+            index++;
+         }
+    }
+    return lista;
+}
 
 }

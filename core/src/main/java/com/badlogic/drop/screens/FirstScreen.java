@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class FirstScreen implements Screen {
@@ -176,9 +177,19 @@ public class FirstScreen implements Screen {
 
         int nivel   = flowJuego.getNivelNumero();
         long tiempo = flowJuego.getTiempoTranscurridoSeg();
+        int puntaje = flowJuego.getPuntaje();
 
         stats.registrarPartida(nivel, tiempo);
         stats.registrarNivelCompletado(nivel);
+        stats.actualizarPuntajeMaximo(nivel, puntaje);
+
+        // Actualizar ranking global con la suma de todos los puntajes máximos
+        int rankingTotal = 0;
+        for (int p : stats.getPuntajeMaximoPorNivel().values()) {
+            rankingTotal += p;
+        }
+        u.setRanking(rankingTotal);
+
         GestorArchivos.guardarUsuario(u);
     }
 
@@ -233,19 +244,72 @@ public class FirstScreen implements Screen {
 
     private void dibujarHUD() {
         batch.begin();
-        font.draw(batch,
-            "Nivel: "    + flowJuego.getNivelNumero()
+
+        // HUD superior: nivel, tiempo (cronómetro), intentos, controles
+        String hudTexto = "Nivel: "    + flowJuego.getNivelNumero()
             + "  Tiempo: " + flowJuego.getTiempoRestante() + "s"
             + "  Intentos: " + flowJuego.getIntentos()
-            + "  [R] Reiniciar  [M] Menu",
-            10, Gdx.graphics.getHeight() - 10);
+            + "  [R] Reiniciar  [M] Menu";
+        font.draw(batch, hudTexto, 10, Gdx.graphics.getHeight() - 10);
 
-        if (flowJuego.isTerminado()) {
-            String msg = flowJuego.isVictoria()
-                ? (flowJuego.esUltimoNivel() ? "!JUEGO COMPLETADO!" : "!NIVEL COMPLETADO!")
-                : "TIEMPO AGOTADO  -  R para reiniciar";
-            font.draw(batch, msg, offsetX, offsetY - 10);
+        // Pantalla de VICTORIA con overlay semitransparente
+        if (flowJuego.isTerminado() && flowJuego.isVictoria()) {
+            batch.end();
+
+            // Overlay oscuro semitransparente
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            shapeRenderer.setColor(0, 0, 0, 0.65f);
+            shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+            shapeRenderer.end();
+
+            batch.begin();
+
+            float centroX = Gdx.graphics.getWidth()  / 2f;
+            float centroY = Gdx.graphics.getHeight() / 2f;
+
+            GlyphLayout layout = new GlyphLayout();
+
+            // 1. Título "¡GANASTE!" o "¡JUEGO COMPLETADO!"
+            font.getData().setScale(3f);
+            String titulo = flowJuego.esUltimoNivel() ? "¡JUEGO COMPLETADO!" : "¡GANASTE!";
+            layout.setText(font, titulo);
+            font.draw(batch, titulo, centroX - layout.width / 2f, centroY + 80);
+            font.getData().setScale(1f);
+
+            // 2. Puntaje obtenido
+            font.getData().setScale(1.5f);
+            String puntajeStr = "Puntaje: " + flowJuego.getPuntaje() + " pts";
+            layout.setText(font, puntajeStr);
+            font.draw(batch, puntajeStr, centroX - layout.width / 2f, centroY + 20);
+            font.getData().setScale(1f);
+
+            // 3. Mejor puntaje del nivel
+            if (juego.getUsuarioActual() != null) {
+                int nivel = flowJuego.getNivelNumero();
+                int mejorPuntaje = juego.getUsuarioActual().getEstadisticas().getPuntajeMaximo(nivel);
+                if (mejorPuntaje > 0) {
+                    String mejorStr = "Mejor puntaje: " + mejorPuntaje + " pts";
+                    layout.setText(font, mejorStr);
+                    font.draw(batch, mejorStr, centroX - layout.width / 2f, centroY - 20);
+                }
+            }
+
+            // 4. Mensaje de continuación
+            font.getData().setScale(0.8f);
+            String continuarStr;
+            if (!flowJuego.esUltimoNivel()) {
+                int segRest = (int) (DELAY_VICTORIA - tiempoVictoria + 1);
+                continuarStr = "Siguiente nivel en " + segRest + "...";
+            } else {
+                continuarStr = "Presiona M para volver al menú";
+            }
+            layout.setText(font, continuarStr);
+            font.draw(batch, continuarStr, centroX - layout.width / 2f, centroY - 70);
+            font.getData().setScale(1f);
         }
+
         batch.end();
     }
 
