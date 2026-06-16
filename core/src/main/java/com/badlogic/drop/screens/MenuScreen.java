@@ -34,9 +34,10 @@ public class MenuScreen implements Screen {
         Estadisticas stats = usuario.getEstadisticas();
 
         Table tabla = new Table();
-        tabla.setFillParent(true);
         tabla.center();
-        stage.addActor(tabla);
+        ScrollPane scroll = new ScrollPane (tabla,skin);
+        scroll.setFillParent(true);
+        stage.addActor(scroll);
 
         // Estilo de título
         Label.LabelStyle estiloTitulo = new Label.LabelStyle();
@@ -63,6 +64,7 @@ public class MenuScreen implements Screen {
         // Botones del menú
         TextButton btnJugar      = new TextButton("Jugar", skin);
         TextButton btnEstadisticas = new TextButton("Estadísticas", skin);
+        TextButton btnRankings = new TextButton("Rankings", skin);
         TextButton btnCerrarSesion = new TextButton("Cerrar sesión", skin);
 
         float ancho = 280f;
@@ -76,6 +78,7 @@ public class MenuScreen implements Screen {
         tabla.add(lblNiveles).left().padBottom(4).row();
         tabla.add(lblRanking).left().padBottom(20).row();
         tabla.add(separador).padBottom(15).row();
+        tabla.add(btnRankings).width(ancho).padBottom(10).row();
         tabla.add(btnJugar).width(ancho).padBottom(10).row();
         tabla.add(btnEstadisticas).width(ancho).padBottom(10).row();
         tabla.add(btnCerrarSesion).width(ancho).row();
@@ -94,7 +97,15 @@ public class MenuScreen implements Screen {
                 juego.setScreen(new EstadisticasScreen(juego));
             }
         });
-
+        
+        btnRankings.addListener(new ChangeListener(){
+            public void changed (ChangeListener.ChangeEvent event, Actor actor){
+                juego.setScreen(new RankingScreen(juego));
+            }
+        });
+        
+        
+        
         btnCerrarSesion.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
@@ -102,6 +113,8 @@ public class MenuScreen implements Screen {
                 juego.setScreen(new LoginScreen(juego));
             }
         });
+        
+        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
     }
 
     @Override
