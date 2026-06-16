@@ -7,6 +7,7 @@ import com.badlogic.drop.juego.FlowFreeJuego;
 import com.badlogic.drop.config.Usuarios;
 import com.badlogic.drop.config.Estadisticas;
 import com.badlogic.drop.archivos.GestorArchivos;
+import com.badlogic.drop.juego.HiloJuego;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -21,12 +22,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class FirstScreen implements Screen {
 
-    // --- INTEGRACIÓN CON MENÚ ---
+    
     private final Main juego;
     private final int nivelInicial;
-    // ----------------------------
+   
 
     private FlowFreeJuego flowJuego;
+    private  HiloJuego hiloJuego;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch batch;
     private BitmapFont font;
@@ -59,12 +61,14 @@ public class FirstScreen implements Screen {
     @Override
     public void show() {
         flowJuego     = new FlowFreeJuego(nivelInicial);
+        hiloJuego = new HiloJuego(flowJuego);
         shapeRenderer = new ShapeRenderer();
         batch         = new SpriteBatch();
         font          = new BitmapFont();
         font.setColor(Color.WHITE);
         calcularLayout();
         configurarInput();
+        hiloJuego.start();
     }
 
     private void calcularLayout() {
@@ -137,7 +141,6 @@ public class FirstScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        flowJuego.actualizar();
 
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -309,13 +312,51 @@ public class FirstScreen implements Screen {
             font.draw(batch, continuarStr, centroX - layout.width / 2f, centroY - 70);
             font.getData().setScale(1f);
         }
+        
+        if (flowJuego.isTerminado() && !flowJuego.isVictoria()){
+             batch.end();
+
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            shapeRenderer.setColor(0, 0, 0, 0.65f);
+            shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+            shapeRenderer.end();
+
+            batch.begin();
+
+            float centroX = Gdx.graphics.getWidth()  / 2f;
+            float centroY = Gdx.graphics.getHeight() / 2f;
+
+            GlyphLayout layout = new GlyphLayout();
+            
+            font.getData().setScale(3f);
+            String perdistes = "PERDISTES!";
+            layout.setText(font, perdistes);
+            font.draw(batch, perdistes, centroX - layout.width /2f, centroY+40);
+            font.getData().setScale(1f);
+            
+            
+            String mensaje = "Presiona R para reintentar";
+            layout.setText(font, mensaje);
+            font.draw(batch, mensaje, centroX - layout.width / 2f, centroY -20);
+        }
+        
 
         batch.end();
     }
 
     @Override public void resize(int w, int h) { if (w > 0 && h > 0) calcularLayout(); }
-    @Override public void dispose() { shapeRenderer.dispose(); batch.dispose(); font.dispose(); }
+    @Override public void dispose() {
+        shapeRenderer.dispose();
+        batch.dispose();
+        font.dispose();
+        if (hiloJuego!= null) hiloJuego.detener();
+    }
+    
     @Override public void pause() {}
     @Override public void resume() {}
-    @Override public void hide() {}
+    @Override public void hide() {
+        dispose();
+    }
 }
