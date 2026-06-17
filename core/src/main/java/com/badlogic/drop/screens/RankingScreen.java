@@ -57,17 +57,22 @@ public class RankingScreen implements Screen {
         
         
         Usuarios[] usuarios = GestorArchivos.cargarTodosLosUsuarios();
-         Arrays.sort(usuarios, new Comparator<Usuarios>() {
-           public int compare (Usuarios a, Usuarios b){
-               if (a == null && b == null)
-                   return 0;
-               if (a == null) 
-                   return 1;
-               if (b == null) 
-                   return -1;
-               return Integer.compare(b.getRanking(), a.getRanking());
-           }
-         });
+         if (usuarios == null || usuarios.length == 0){
+             tabla.add(new Label ("No hay jugadores registrados", skin)).padBottom(20).row();
+             
+         } else {
+             Arrays.sort(usuarios, new Comparator<Usuarios>(){
+                 public int compare (Usuarios a, Usuarios b){
+                     if (a == null && b == null)
+                         return 0;
+                     if (a == null)
+                         return 1;
+                     if (b== null)
+                         return -1;
+                     return Integer.compare(b.getRanking(), a.getRanking());
+                 } 
+             });
+         }
          
          
          Table encabezado = new Table();

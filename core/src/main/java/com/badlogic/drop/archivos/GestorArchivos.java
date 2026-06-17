@@ -17,6 +17,14 @@ public class GestorArchivos {
         }
     }
     
+    private static String getRutaBase(){
+        String ruta = System.getProperty("user.dir" + "/usuarios/");
+        File carpeta = new File (ruta);
+        if (!carpeta.exists()){
+            carpeta.mkdirs();
+        }
+        return ruta;
+    }
     
     public static void guardarUsuario (Usuarios usuario){
         crearCarpetaUsuario(usuario.getUsername());
@@ -60,27 +68,35 @@ public static String hashContrasena (String contrasena){
 }
 
 public static Usuarios[] cargarTodosLosUsuarios(){
-    File carpeta = new File (RUTA_BASE);
-    File[] carpetas = carpeta.listFiles();
-    if (carpetas == null)
-        return new Usuarios[0];
-    
-    int count = 0;
-    for (int i = 0; i < carpetas.length; i++){
-        if (carpetas[i].isDirectory()){
-            count++;
-        }
-    }
-    
-    Usuarios[] lista = new Usuarios[count];
-    int index = 0;
-    for (int i = 0; i < carpetas.length; i++){
-        if (carpetas[i].isDirectory()){
-            lista[index] = cargarUsuario(carpetas[i].getName());
-            index++;
+ File carpeta = new File (RUTA_BASE);
+ if (!carpeta.exists() || !carpeta.isDirectory()){
+     return new Usuarios[0];
+ }
+ 
+ File[] carpetas = carpeta.listFiles();
+ if (carpetas == null || carpetas.length == 0)
+     return new Usuarios[0];
+ 
+ int count = 0;
+ for (File f : carpetas){
+     if (f.isDirectory()) count++;
+ }
+ 
+ Usuarios[] lista = new Usuarios[count];
+ int index = 0;
+ for (File f: carpetas){
+     if (f.isDirectory()){
+         try{
+           lista[index] = cargarUsuario(f.getName());  
+         }catch (Exception e){
+             System.out.println("Error al cargar usuario" +f.getName());
+             lista[index] = null;
+             
          }
-    }
-    return lista;
+         index++;
+     }
+ }
+ return lista;
 }
 
 
