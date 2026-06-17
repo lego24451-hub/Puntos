@@ -4,6 +4,8 @@ import com.badlogic.drop.config.Usuarios;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class GestorArchivos {
     private static final String RUTA_BASE = "usuarios/";
@@ -79,6 +81,47 @@ public static Usuarios[] cargarTodosLosUsuarios(){
          }
     }
     return lista;
+}
+
+
+public static String guardarAvatarPersonalizado (String username, String rutaOrigen){
+    try{
+        File origen = new File (rutaOrigen);
+        if (!origen.exists())
+            return null;
+        
+        String nombre = origen.getName();
+        String extension = nombre.substring(nombre.lastIndexOf(".")).toLowerCase();
+        
+        if (!extension.equals(".png") && !extension.equals(".jpg") && !extension.equals(".jpeg"))
+            return null;
+   
+        
+    crearCarpetaUsuario(username);
+    String destino = RUTA_BASE + username + "/avatar" + extension;
+    File archivoDestino = new File (destino);
+    
+    Files.copy(
+            origen.toPath(),
+            archivoDestino.toPath(),
+            StandardCopyOption.REPLACE_EXISTING);
+    
+       return destino;
+    
+    }catch (IOException e){
+        System.out.println("Error al guardar avatar: " +e.getMessage());
+        return null;
+    }
+    
+}
+
+public static String getRutaAvatar(String username) {
+    String[] extensiones = {".png", ".jpg", ".jpeg"};
+    for (String ext : extensiones) {
+        File f = new File(RUTA_BASE + username + "/avatar" + ext);
+        if (f.exists()) return f.getAbsolutePath();
+    }
+    return null;
 }
 
 }

@@ -13,6 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import java.io.File;
 
 public class MenuScreen implements Screen {
 
@@ -60,6 +65,28 @@ public class MenuScreen implements Screen {
         lblUltimaSesion.setColor(Color.GRAY);
         
         
+        Image imgAvatar;
+        try{
+            String rutaAvatar = usuario.getAvatar();
+            if (rutaAvatar != null && !rutaAvatar.isEmpty() && !rutaAvatar.equals("avatar_default.png")){
+                File f = new File (rutaAvatar);
+                if (f.exists()){
+                    Texture texAvatar = new Texture (Gdx.files.absolute(rutaAvatar));
+                    imgAvatar = new Image (new TextureRegionDrawable(new TextureRegion(texAvatar)));
+                    
+                } else{
+                    imgAvatar = new Image();
+                } 
+                
+            } 
+            else {
+                imgAvatar = new Image();
+            }
+        }catch (Exception e){
+            imgAvatar = new Image();
+        }
+        TextButton btnCambiarAvatar = new TextButton ("Cambiar avatar", skin);
+        
         Label lblPartidas = new Label("Partidas jugadas: " + stats.getPartidasJugadas(), skin);
         Label lblNiveles  = new Label("Niveles completados: " + stats.getNivelesCompletados(), skin);
         Label lblRanking  = new Label("Ranking: #" + usuario.getRanking(), skin);
@@ -78,6 +105,8 @@ public class MenuScreen implements Screen {
 
         
         tabla.add(titulo).padBottom(5).row();
+        tabla.add(imgAvatar).size(80,80).padBottom(4).row();
+        tabla.add(btnCambiarAvatar).width(180).padBottom(10).row();
         tabla.add(bienvenida).padBottom(2).row();
         tabla.add(infoNombre).padBottom(20).row();
         tabla.add(lblUltimaSesion).padBottom(20).row();
@@ -112,7 +141,12 @@ public class MenuScreen implements Screen {
             }
         });
         
-        
+        btnCambiarAvatar.addListener(new ChangeListener() {
+    @Override
+    public void changed(ChangeEvent event, Actor actor) {
+        juego.setScreen(new AvatarScreen(juego));
+    }
+});
         
         btnCerrarSesion.addListener(new ChangeListener() {
             @Override
