@@ -64,7 +64,7 @@ public class RankingScreen implements Screen {
          });
          
          
-         Label lblEncabezado = new Label ("#  |  Usuario  | Puntake Total" , skin);
+         Label lblEncabezado = new Label ("#  |  Usuario  | Puntaje Total" , skin);
          lblEncabezado.setColor(Color.LIGHT_GRAY);
          tabla.add(lblEncabezado).padBottom(10).row();
          
@@ -77,7 +77,7 @@ public class RankingScreen implements Screen {
          else {
              for (int i = 0; i < usuarios.length; i++){
                  Usuarios u = usuarios[i];
-                 if (u == null)
+                 if (u == null) 
                      continue;
                  
                  String medalla = "";
