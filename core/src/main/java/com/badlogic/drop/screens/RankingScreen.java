@@ -57,6 +57,7 @@ public class RankingScreen implements Screen {
         
         
         Usuarios[] usuarios = GestorArchivos.cargarTodosLosUsuarios();
+<<<<<<< HEAD
          Arrays.sort(usuarios, new Comparator<Usuarios>() {
             public int compare (Usuarios a, Usuarios b){
                 return Integer.compare(b.getRanking(), a.getRanking());
@@ -67,15 +68,44 @@ public class RankingScreen implements Screen {
          Label lblEncabezado = new Label ("#  |  Usuario  | Puntaje Total" , skin);
          lblEncabezado.setColor(Color.LIGHT_GRAY);
          tabla.add(lblEncabezado).padBottom(10).row();
+=======
+         if (usuarios == null || usuarios.length == 0){
+             tabla.add(new Label ("No hay jugadores registrados", skin)).padBottom(20).row();
+             
+         } else {
+             Arrays.sort(usuarios, new Comparator<Usuarios>(){
+                 public int compare (Usuarios a, Usuarios b){
+                     if (a == null && b == null)
+                         return 0;
+                     if (a == null)
+                         return 1;
+                     if (b== null)
+                         return -1;
+                     return Integer.compare(b.getRanking(), a.getRanking());
+                 } 
+             });
+         }
+>>>>>>> 5670a709cb200f7ace865dd2b73572568ed8aede
          
          
+         Table encabezado = new Table();
+         Label lblNum = new Label ("#", skin);
+         Label lblUser = new Label ("Usuario", skin);
+         Label lblPts = new Label ("Puntaje Total", skin);
+         lblNum.setColor(Color.LIGHT_GRAY);
+         lblUser.setColor(Color.LIGHT_GRAY);
+         lblPts.setColor(Color.LIGHT_GRAY);
+         encabezado.add(lblNum).width(30).padRight(20);
+         encabezado.add(lblUser).width(150).padRight(20);
+         encabezado.add(lblPts).width(120);
+         tabla.add(encabezado).padBottom(8).row();
          
          if (usuarios.length == 0){
-             tabla.add(new Label("No existe jugadores registrados" , skin)).padBottom(20).row();
+             tabla.add(new Label("No hay jugadores registrados",skin)).padBottom(20).row();
          }
-         
-         else {
+         else{
              for (int i = 0; i < usuarios.length; i++){
+<<<<<<< HEAD
                  Usuarios u = usuarios[i];
                  if (u == null) 
                      continue;
@@ -90,8 +120,31 @@ public class RankingScreen implements Screen {
                  tabla.add(fila).padBottom(4).row();
                  
                  
+=======
+             Usuarios u = usuarios[i];
+             if (u == null)
+                 continue;
+             String medalla = "";
+             if (i == 0)
+                 medalla = "🥇";
+             else if (i == 1)
+                 medalla = "🥈";
+             else if (i == 2)
+                 medalla = "🥉";
+             else medalla = String.valueOf(i+1);
+             
+             Table fila = new Table();
+             fila.add(new Label(medalla,skin)).width(30).padRight(20);
+             fila.add(new Label(u.getUsername(),skin)).width(150).padRight(20);
+             fila.add(new Label(u.getRanking() + "pts" , skin)).width(120);
+             
+             if (u.getUsername().equals(juego.getUsuarioActual().getUsername())){
+                 fila.setBackground(skin.newDrawable("white", new Color(0.3f, 0.3f, 0.7f, 0.3f)));
+>>>>>>> 5670a709cb200f7ace865dd2b73572568ed8aede
              }
+             tabla.add(fila).padBottom(6).row();
          }
+         } 
          
          
          

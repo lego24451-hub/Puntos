@@ -13,6 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import java.io.File;
 
 public class MenuScreen implements Screen {
 
@@ -39,29 +44,58 @@ public class MenuScreen implements Screen {
         scroll.setFillParent(true);
         stage.addActor(scroll);
 
-        // Estilo de título
+        
         Label.LabelStyle estiloTitulo = new Label.LabelStyle();
         estiloTitulo.font = skin.getFont("default-font");
         estiloTitulo.fontColor = new Color(0.32f, 0.29f, 0.72f, 1f);
 
-        // Encabezado
-        Label titulo = new Label("Flow Free Game", estiloTitulo);
+        
+        Label titulo = new Label("Flow Free", estiloTitulo);
         titulo.setFontScale(1.8f);
 
         Label bienvenida = new Label("Bienvenido, " + usuario.getUsername(), skin);
         Label infoNombre = new Label(usuario.getNombreCompleto(), skin);
         infoNombre.setColor(Color.GRAY);
 
-        // Stats rápidas
+        String ultimaSesion = usuario.getUltimaSesion() != null
+      ? "Última sesión: " + usuario.getUltimaSesion()
+           .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+     : "Primera sesión";
+     Label lblUltimaSesion = new Label(ultimaSesion, skin);
+        lblUltimaSesion.setColor(Color.GRAY);
+        
+        
+        Image imgAvatar;
+        try{
+            String rutaAvatar = usuario.getAvatar();
+            if (rutaAvatar != null && !rutaAvatar.isEmpty() && !rutaAvatar.equals("avatar_default.png")){
+                File f = new File (rutaAvatar);
+                if (f.exists()){
+                    Texture texAvatar = new Texture (Gdx.files.absolute(rutaAvatar));
+                    imgAvatar = new Image (new TextureRegionDrawable(new TextureRegion(texAvatar)));
+                    
+                } else{
+                    imgAvatar = new Image();
+                } 
+                
+            } 
+            else {
+                imgAvatar = new Image();
+            }
+        }catch (Exception e){
+            imgAvatar = new Image();
+        }
+        TextButton btnCambiarAvatar = new TextButton ("Cambiar avatar", skin);
+        
         Label lblPartidas = new Label("Partidas jugadas: " + stats.getPartidasJugadas(), skin);
         Label lblNiveles  = new Label("Niveles completados: " + stats.getNivelesCompletados(), skin);
         Label lblRanking  = new Label("Ranking: #" + usuario.getRanking(), skin);
 
-        // Separador
+       
         Label separador = new Label("─────────────────", skin);
         separador.setColor(Color.LIGHT_GRAY);
 
-        // Botones del menú
+        
         TextButton btnJugar      = new TextButton("Jugar", skin);
         TextButton btnEstadisticas = new TextButton("Estadísticas", skin);
         TextButton btnRankings = new TextButton("Rankings", skin);
@@ -69,10 +103,13 @@ public class MenuScreen implements Screen {
 
         float ancho = 280f;
 
-        // Layout
+        
         tabla.add(titulo).padBottom(5).row();
+        tabla.add(imgAvatar).size(80,80).padBottom(4).row();
+        tabla.add(btnCambiarAvatar).width(180).padBottom(10).row();
         tabla.add(bienvenida).padBottom(2).row();
         tabla.add(infoNombre).padBottom(20).row();
+        tabla.add(lblUltimaSesion).padBottom(20).row();
         tabla.add(separador).padBottom(10).row();
         tabla.add(lblPartidas).left().padBottom(4).row();
         tabla.add(lblNiveles).left().padBottom(4).row();
@@ -104,7 +141,12 @@ public class MenuScreen implements Screen {
             }
         });
         
-        
+        btnCambiarAvatar.addListener(new ChangeListener() {
+    @Override
+    public void changed(ChangeEvent event, Actor actor) {
+        juego.setScreen(new AvatarScreen(juego));
+    }
+});
         
         btnCerrarSesion.addListener(new ChangeListener() {
             @Override

@@ -26,7 +26,7 @@ public class FirstScreen implements Screen {
     private final Main juego;
     private final int nivelInicial;
    
-
+ private com.badlogic.gdx.graphics.OrthographicCamera camara;
     private FlowFreeJuego flowJuego;
     private  HiloJuego hiloJuego;
     private ShapeRenderer shapeRenderer;
@@ -40,6 +40,7 @@ public class FirstScreen implements Screen {
     private float tiempoVictoria  = 0f;
     private boolean esperandoAvance = false;
     private static final float DELAY_VICTORIA = 3.0f;
+    
 
     private static final Color[] COLORES = {
         Color.BLACK,
@@ -52,7 +53,7 @@ public class FirstScreen implements Screen {
         Color.PINK
     };
 
-    // Constructor que recibe Main y el nivel a cargar
+   
     public FirstScreen(Main juego, int nivelInicial) {
         this.juego        = juego;
         this.nivelInicial = nivelInicial;
@@ -60,15 +61,23 @@ public class FirstScreen implements Screen {
 
     @Override
     public void show() {
+        
         flowJuego     = new FlowFreeJuego(nivelInicial);
         hiloJuego = new HiloJuego(flowJuego);
         shapeRenderer = new ShapeRenderer();
         batch         = new SpriteBatch();
         font          = new BitmapFont();
         font.setColor(Color.WHITE);
+        camara = new com.badlogic.gdx.graphics.OrthographicCamera();
+        camara.setToOrtho(false,Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        shapeRenderer.setProjectionMatrix(camara.combined);
+        batch.setProjectionMatrix(camara.combined);
+        batch.setProjectionMatrix(camara.combined);
+      
         calcularLayout();
         configurarInput();
         hiloJuego.start();
+        
     }
 
     private void calcularLayout() {
@@ -90,7 +99,7 @@ public class FirstScreen implements Screen {
                     esperandoAvance = false;
                     tiempoVictoria  = 0f;
                 }
-                // ESC o M → volver al menú
+               
                 if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.M) {
                     volverAlMenu();
                 }
@@ -165,14 +174,13 @@ public class FirstScreen implements Screen {
                     calcularLayout();
                     configurarInput();
                 } else {
-                    // Juego completo → volver al menú
                     volverAlMenu();
                 }
             }
         }
     }
 
-    /** Guarda la partida en las estadísticas del usuario y persiste en disco. */
+    
     private void registrarEstadisticas() {
         if (juego.getUsuarioActual() == null) return;
         Usuarios u = juego.getUsuarioActual();
@@ -186,7 +194,7 @@ public class FirstScreen implements Screen {
         stats.registrarNivelCompletado(nivel);
         stats.actualizarPuntajeMaximo(nivel, puntaje);
 
-        // Actualizar ranking global con la suma de todos los puntajes máximos
+        
         int rankingTotal = 0;
         for (int p : stats.getPuntajeMaximoPorNivel().values()) {
             rankingTotal += p;
@@ -196,7 +204,7 @@ public class FirstScreen implements Screen {
         GestorArchivos.guardarUsuario(u);
     }
 
-    /** Vuelve al menú principal guardando el estado actual. */
+    
     private void volverAlMenu() {
         if (juego.getUsuarioActual() != null) {
             GestorArchivos.guardarUsuario(juego.getUsuarioActual());
@@ -248,18 +256,18 @@ public class FirstScreen implements Screen {
     private void dibujarHUD() {
         batch.begin();
 
-        // HUD superior: nivel, tiempo (cronómetro), intentos, controles
+       
         String hudTexto = "Nivel: "    + flowJuego.getNivelNumero()
             + "  Tiempo: " + flowJuego.getTiempoRestante() + "s"
             + "  Intentos: " + flowJuego.getIntentos()
             + "  [R] Reiniciar  [M] Menu";
         font.draw(batch, hudTexto, 10, Gdx.graphics.getHeight() - 10);
 
-        // Pantalla de VICTORIA con overlay semitransparente
+       
         if (flowJuego.isTerminado() && flowJuego.isVictoria()) {
             batch.end();
 
-            // Overlay oscuro semitransparente
+           
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             Gdx.gl.glEnable(GL20.GL_BLEND);
             shapeRenderer.setColor(0, 0, 0, 0.65f);
@@ -274,21 +282,21 @@ public class FirstScreen implements Screen {
 
             GlyphLayout layout = new GlyphLayout();
 
-            // 1. Título "¡GANASTE!" o "¡JUEGO COMPLETADO!"
+         
             font.getData().setScale(3f);
             String titulo = flowJuego.esUltimoNivel() ? "¡JUEGO COMPLETADO!" : "¡GANASTE!";
             layout.setText(font, titulo);
             font.draw(batch, titulo, centroX - layout.width / 2f, centroY + 80);
             font.getData().setScale(1f);
 
-            // 2. Puntaje obtenido
+          
             font.getData().setScale(1.5f);
             String puntajeStr = "Puntaje: " + flowJuego.getPuntaje() + " pts";
             layout.setText(font, puntajeStr);
             font.draw(batch, puntajeStr, centroX - layout.width / 2f, centroY + 20);
             font.getData().setScale(1f);
 
-            // 3. Mejor puntaje del nivel
+          
             if (juego.getUsuarioActual() != null) {
                 int nivel = flowJuego.getNivelNumero();
                 int mejorPuntaje = juego.getUsuarioActual().getEstadisticas().getPuntajeMaximo(nivel);
@@ -299,7 +307,7 @@ public class FirstScreen implements Screen {
                 }
             }
 
-            // 4. Mensaje de continuación
+            
             font.getData().setScale(0.8f);
             String continuarStr;
             if (!flowJuego.esUltimoNivel()) {
@@ -346,12 +354,21 @@ public class FirstScreen implements Screen {
         batch.end();
     }
 
-    @Override public void resize(int w, int h) { if (w > 0 && h > 0) calcularLayout(); }
+    @Override public void resize(int w, int h) { 
+        if (w <= 0 || h <= 0) 
+            return;
+        camara.setToOrtho(false,w,h);
+        camara.update();
+        shapeRenderer.setProjectionMatrix(camara.combined);
+        batch.setProjectionMatrix(camara.combined);
+        calcularLayout();
+    }
     @Override public void dispose() {
         shapeRenderer.dispose();
         batch.dispose();
         font.dispose();
-        if (hiloJuego!= null) hiloJuego.detener();
+        if (hiloJuego!= null)
+            hiloJuego.detener();
     }
     
     @Override public void pause() {}
