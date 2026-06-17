@@ -34,21 +34,21 @@ public class LoginScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        // Tabla principal centrada
+        
         Table tabla = new Table();
         tabla.setFillParent(true);
         tabla.center();
         stage.addActor(tabla);
 
-        // Título
+        
         Label.LabelStyle estiloTitulo = new Label.LabelStyle();
         estiloTitulo.font = skin.getFont("default-font");
         estiloTitulo.fontColor = new Color(0.32f, 0.29f, 0.72f, 1f); // púrpura
 
-        Label titulo = new Label("Flow Free Game", estiloTitulo);
+        Label titulo = new Label("Flow Free", estiloTitulo);
         titulo.setFontScale(2f);
 
-        // Campos
+        
         campoUsuario = new TextField("", skin);
         campoUsuario.setMessageText("Nombre de usuario");
 
@@ -57,15 +57,15 @@ public class LoginScreen implements Screen {
         campoContrasena.setPasswordMode(true);
         campoContrasena.setPasswordCharacter('*');
 
-        // Botones
+       
         TextButton btnLogin = new TextButton("Iniciar sesión", skin);
         TextButton btnRegistro = new TextButton("¿No tienes cuenta? Regístrate", skin);
 
-        // Label de error
+      
         labelError = new Label("", skin);
         labelError.setColor(Color.RED);
 
-        // Layout
+       
         tabla.add(titulo).colspan(2).padBottom(40).row();
         tabla.add(new Label("Usuario:", skin)).left().padBottom(5);
         tabla.add(campoUsuario).width(300).padBottom(5).row();
@@ -75,7 +75,7 @@ public class LoginScreen implements Screen {
         tabla.add(btnLogin).colspan(2).width(300).padBottom(10).row();
         tabla.add(btnRegistro).colspan(2).width(300).row();
 
-        // Acciones
+        
         btnLogin.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
@@ -111,6 +111,11 @@ public class LoginScreen implements Screen {
             return;
         }
 
+            juego.setUsuarioActual(u);
+            u.setUltimaSesion(java.time.LocalDateTime.now());
+            GestorArchivos.guardarUsuario(u);
+            juego.setScreen(new MenuScreen(juego));
+        
         juego.setUsuarioActual(u);
         juego.setScreen(new MenuScreen(juego));
     }

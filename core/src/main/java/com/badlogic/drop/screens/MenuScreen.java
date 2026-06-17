@@ -39,29 +39,36 @@ public class MenuScreen implements Screen {
         scroll.setFillParent(true);
         stage.addActor(scroll);
 
-        // Estilo de título
+        
         Label.LabelStyle estiloTitulo = new Label.LabelStyle();
         estiloTitulo.font = skin.getFont("default-font");
         estiloTitulo.fontColor = new Color(0.32f, 0.29f, 0.72f, 1f);
 
-        // Encabezado
-        Label titulo = new Label("Flow Free Game", estiloTitulo);
+        
+        Label titulo = new Label("Flow Free", estiloTitulo);
         titulo.setFontScale(1.8f);
 
         Label bienvenida = new Label("Bienvenido, " + usuario.getUsername(), skin);
         Label infoNombre = new Label(usuario.getNombreCompleto(), skin);
         infoNombre.setColor(Color.GRAY);
 
-        // Stats rápidas
+        String ultimaSesion = usuario.getUltimaSesion() != null
+      ? "Última sesión: " + usuario.getUltimaSesion()
+           .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+     : "Primera sesión";
+     Label lblUltimaSesion = new Label(ultimaSesion, skin);
+        lblUltimaSesion.setColor(Color.GRAY);
+        
+        
         Label lblPartidas = new Label("Partidas jugadas: " + stats.getPartidasJugadas(), skin);
         Label lblNiveles  = new Label("Niveles completados: " + stats.getNivelesCompletados(), skin);
         Label lblRanking  = new Label("Ranking: #" + usuario.getRanking(), skin);
 
-        // Separador
+       
         Label separador = new Label("─────────────────", skin);
         separador.setColor(Color.LIGHT_GRAY);
 
-        // Botones del menú
+        
         TextButton btnJugar      = new TextButton("Jugar", skin);
         TextButton btnEstadisticas = new TextButton("Estadísticas", skin);
         TextButton btnRankings = new TextButton("Rankings", skin);
@@ -69,10 +76,11 @@ public class MenuScreen implements Screen {
 
         float ancho = 280f;
 
-        // Layout
+        
         tabla.add(titulo).padBottom(5).row();
         tabla.add(bienvenida).padBottom(2).row();
         tabla.add(infoNombre).padBottom(20).row();
+        tabla.add(lblUltimaSesion).padBottom(20).row();
         tabla.add(separador).padBottom(10).row();
         tabla.add(lblPartidas).left().padBottom(4).row();
         tabla.add(lblNiveles).left().padBottom(4).row();

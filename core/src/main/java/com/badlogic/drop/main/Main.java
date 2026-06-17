@@ -37,5 +37,8 @@ public class Main extends Game {
     @Override
     public void resize(int width, int height) {
         if (width <= 0 || height <= 0) return;
+        if (getScreen()!=null){
+            getScreen().resize(width, height);
+        }
     }
 }
