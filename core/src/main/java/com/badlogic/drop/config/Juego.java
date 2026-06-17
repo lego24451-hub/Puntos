@@ -50,15 +50,33 @@ public abstract class Juego {
     }
 
     
-    public Tablero getTablero() { return tablero; }
-    public Nivel getNivel() { return nivel; }
-    public int getNivelNumero() { return nivelActual; }
-    public int getIntentos() { return intentos; }
-    public boolean isPausado() { return pausado; }
-    public boolean isTerminado() { return terminado; }
-    public boolean isVictoria() { return victoria; }
-    public int getPuntaje() { return puntaje; }
+    public Tablero getTablero(){
+        return tablero; 
+    }
+    public Nivel getNivel(){ 
+        return nivel; 
+    }
+    public int getNivelNumero(){ 
+        return nivelActual; 
+    }
+    public int getIntentos(){ 
+        return intentos; 
+    }
+    public boolean isPausado(){ 
+        return pausado; 
+    }
+    public boolean isTerminado(){ 
+        return terminado; 
+    }
+    public boolean isVictoria(){ 
+        return victoria; 
+    }
+    public int getPuntaje(){ 
+        return puntaje; 
+    }
 
-    public int getVidas() {return vidas;}
+    public int getVidas(){
+        return vidas;
+    }
     
 }

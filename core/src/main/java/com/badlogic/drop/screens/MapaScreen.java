@@ -1,6 +1,7 @@
 package com.badlogic.drop.screens;
 
 import com.badlogic.drop.main.Main;
+import com.badlogic.drop.config.Textos;
 import com.badlogic.drop.config.Usuarios;
 
 import com.badlogic.gdx.Gdx;
@@ -19,7 +20,6 @@ public class MapaScreen implements Screen {
     private Stage stage;
     private Skin skin;
 
-    // Datos de cada nivel: nombre, dificultad
     private static final String[][] NIVELES = {
         {"Nivel 1", "FÁCIL"},
         {"Nivel 2", "FÁCIL"},
@@ -47,21 +47,19 @@ public class MapaScreen implements Screen {
         tabla.center();
         stage.addActor(tabla);
 
-        // Título
         Label.LabelStyle estiloTitulo = new Label.LabelStyle();
         estiloTitulo.font = skin.getFont("default-font");
         estiloTitulo.fontColor = new Color(0.32f, 0.29f, 0.72f, 1f);
 
-        Label titulo = new Label("Mapa de Niveles", estiloTitulo);
+        Label titulo = new Label(Textos.MAPA_NIVELES(), estiloTitulo);
         titulo.setFontScale(1.6f);
 
-        Label subtitulo = new Label("Completa los niveles en orden para desbloquear los siguientes", skin);
+        Label subtitulo = new Label(Textos.COMPLETA_NIVELES(), skin);
         subtitulo.setColor(Color.GRAY);
 
         tabla.add(titulo).padBottom(5).row();
         tabla.add(subtitulo).padBottom(25).row();
 
-        // Grid de botones de nivel (3 columnas)
         Table gridNiveles = new Table();
         for (int i = 0; i < NIVELES.length; i++) {
             final int numeroNivel = i + 1;
@@ -72,7 +70,7 @@ public class MapaScreen implements Screen {
             TextButton btnNivel = new TextButton(textoBtn, skin);
 
             if (completado) {
-                btnNivel.setColor(new Color(0.12f, 0.43f, 0.34f, 1f)); // verde
+                btnNivel.setColor(new Color(0.12f, 0.43f, 0.34f, 1f));
             } else if (!disponible) {
                 btnNivel.setColor(Color.DARK_GRAY);
                 btnNivel.setDisabled(true);
@@ -93,8 +91,7 @@ public class MapaScreen implements Screen {
 
         tabla.add(gridNiveles).padBottom(25).row();
 
-        // Botón volver
-        TextButton btnVolver = new TextButton("← Volver al menú", skin);
+        TextButton btnVolver = new TextButton(Textos.VOLVER_MENU(), skin);
         tabla.add(btnVolver).width(200).row();
 
         btnVolver.addListener(new ChangeListener() {
@@ -106,26 +103,29 @@ public class MapaScreen implements Screen {
     }
 
     private void iniciarNivel(int numeroNivel) {
-        // Solo niveles 1-6 están definidos
         if (numeroNivel < 1 || numeroNivel > 6) {
             Gdx.app.log("MapaScreen", "Nivel " + numeroNivel + " no disponible");
             return;
         }
-        // FirstScreen crea su propio FlowFreeJuego en show()
         juego.setScreen(new FirstScreen(juego, numeroNivel));
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0.95f, 0.95f, 0.97f, 1f);
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
     }
 
     @Override public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() { dispose(); }
-    @Override public void dispose() { stage.dispose(); skin.dispose(); }
+    @Override public void pause() {
+    }
+    @Override public void resume() {
+    }
+    @Override public void hide() { 
+        dispose(); 
+    }
+    @Override public void dispose(){ stage.dispose(); skin.dispose(); 
+    }
 }

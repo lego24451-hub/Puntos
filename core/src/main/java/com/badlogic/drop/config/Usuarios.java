@@ -63,6 +63,10 @@ public class Usuarios implements Serializable {
         return amigos;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
     }

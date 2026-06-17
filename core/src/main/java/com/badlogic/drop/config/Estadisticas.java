@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 public class Estadisticas implements Serializable {
-    private static final long serialVersionUID = 2L; // actualizado para nueva versión
+    private static final long serialVersionUID = 3L; 
     private int partidasJugadas;
     private int nivelesCompletados;
     private HashMap <Integer, Long> tiempoPorNivel;
@@ -66,7 +66,7 @@ public class Estadisticas implements Serializable {
         this.mejorRanking = mejorRanking;
     }
 
-    /** Actualiza el puntaje máximo para un nivel si es mayor al anterior */
+    // Actualiza el puntaje máximo para un nivel si es mayor al anterior 
     public void actualizarPuntajeMaximo(int nivel, int puntaje) {
         Integer anterior = puntajeMaximoPorNivel.get(nivel);
         if (anterior == null || puntaje > anterior) {
@@ -74,7 +74,7 @@ public class Estadisticas implements Serializable {
         }
     }
 
-    /** Obtiene el puntaje máximo de un nivel (0 si no hay registro) */
+    // Obtiene el puntaje máximo de un nivel (0 si no hay registro) 
     public int getPuntajeMaximo(int nivel) {
         return puntajeMaximoPorNivel.getOrDefault(nivel, 0);
     }
@@ -82,5 +82,6 @@ public class Estadisticas implements Serializable {
     public HashMap<Integer, Integer> getPuntajeMaximoPorNivel() {
         return puntajeMaximoPorNivel;
     }
+    
     
 }

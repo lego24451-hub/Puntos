@@ -1,5 +1,6 @@
 package com.badlogic.drop.main;
 
+import com.badlogic.drop.archivos.GestorArchivos;
 import com.badlogic.drop.config.Usuarios;
 import com.badlogic.drop.juego.FlowFreeJuego;
 import com.badlogic.drop.screens.LoginScreen;
@@ -14,9 +15,18 @@ public class Main extends Game {
     public void create() {
         // Inicia con la pantalla de login
         setScreen(new LoginScreen(this));
+
+        // ── Shutdown Hook: guarda datos si el usuario cierra la ventana abruptamente ──
+        final Main app = this;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Usuarios u = app.getUsuarioActual();
+            if (u != null) {
+                GestorArchivos.guardarUsuario(u);
+            }
+        }));
     }
 
-    // --- Usuario actual ---
+   
     public Usuarios getUsuarioActual() {
         return usuarioActual;
     }
@@ -25,7 +35,7 @@ public class Main extends Game {
         this.usuarioActual = usuarioActual;
     }
 
-    // --- FlowFreeJuego (lógica del juego) ---
+    //  FlowFreeJuego (lógica del juego) 
     public FlowFreeJuego getFlowFreeJuego() {
         return flowJuego;
     }

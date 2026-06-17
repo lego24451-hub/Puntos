@@ -1,6 +1,7 @@
 package com.badlogic.drop.screens;
 
 import com.badlogic.drop.main.Main;
+import com.badlogic.drop.config.Textos;
 import com.badlogic.drop.config.Usuarios;
 import com.badlogic.drop.config.Estadisticas;
 
@@ -41,35 +42,30 @@ public class EstadisticasScreen implements Screen {
         tabla.center();
         stage.addActor(tabla);
 
-        // Título
         Label.LabelStyle estiloTitulo = new Label.LabelStyle();
         estiloTitulo.font = skin.getFont("default-font");
         estiloTitulo.fontColor = new Color(0.32f, 0.29f, 0.72f, 1f);
 
-        Label titulo = new Label("Estadísticas", estiloTitulo);
+        Label titulo = new Label(Textos.TITULO_STATS(), estiloTitulo);
         titulo.setFontScale(1.6f);
         Label subUsuario = new Label(usuario.getUsername(), skin);
         subUsuario.setColor(Color.GRAY);
 
         Label separador = new Label("─────────────────", skin);
         separador.setColor(Color.LIGHT_GRAY);
-        Label separador2 = new Label("─────────────────", skin);
-        separador2.setColor(Color.LIGHT_GRAY);
 
-        // Datos generales
-        Label lblPartidas  = new Label("Partidas jugadas:       " + stats.getPartidasJugadas(), skin);
-        Label lblCompletados = new Label("Niveles completados:    " + stats.getNivelesCompletados(), skin);
-        Label lblTiempo    = new Label("Tiempo total jugado:    " + formatearTiempo(stats.getTiempoTotalJugado()), skin);
-        Label lblRanking   = new Label("Ranking:                #" + usuario.getRanking(), skin);
+        Label lblPartidas  = new Label(Textos.PARTIDAS() + stats.getPartidasJugadas(), skin);
+        Label lblCompletados = new Label(Textos.NIVELES_COMP() + stats.getNivelesCompletados(), skin);
+        Label lblTiempo = new Label(Textos.TIEMPO_TOTAL() + formatearTiempo(stats.getTiempoTotalJugado()), skin);
+        Label lblRanking = new Label(Textos.RANKING() + usuario.getRanking(), skin);
 
-        // Mejor tiempo por nivel
-        Label lblMejoresTiempos = new Label("Mejor tiempo por nivel:", skin);
+        Label lblMejoresTiempos = new Label(Textos.MEJORES_TIEMPOS(), skin);
         lblMejoresTiempos.setColor(new Color(0.32f, 0.29f, 0.72f, 1f));
 
         Table tablaTiempos = new Table();
         HashMap<Integer, Long> tiempos = stats.getTiempoPorNivel();
         if (tiempos == null || tiempos.isEmpty()) {
-            tablaTiempos.add(new Label("  Sin registros aún.", skin)).left().row();
+            tablaTiempos.add(new Label(Textos.SIN_REGISTROS(), skin)).left().row();
         } else {
             for (Map.Entry<Integer, Long> entrada : tiempos.entrySet()) {
                 String fila = "  Nivel " + entrada.getKey() + ":  " + formatearTiempo(entrada.getValue());
@@ -77,22 +73,6 @@ public class EstadisticasScreen implements Screen {
             }
         }
 
-        // Mejor puntaje por nivel
-        Label lblMejoresPuntajes = new Label("Mejor puntaje por nivel:", skin);
-        lblMejoresPuntajes.setColor(new Color(0.32f, 0.29f, 0.72f, 1f));
-
-        Table tablaPuntajes = new Table();
-        HashMap<Integer, Integer> puntajes = stats.getPuntajeMaximoPorNivel();
-        if (puntajes == null || puntajes.isEmpty()) {
-            tablaPuntajes.add(new Label("  Sin registros aún.", skin)).left().row();
-        } else {
-            for (Map.Entry<Integer, Integer> entrada : puntajes.entrySet()) {
-                String fila = "  Nivel " + entrada.getKey() + ":  " + entrada.getValue() + " pts";
-                tablaPuntajes.add(new Label(fila, skin)).left().padBottom(3).row();
-            }
-        }
-
-        // Layout
         tabla.add(titulo).padBottom(4).row();
         tabla.add(subUsuario).padBottom(20).row();
         tabla.add(separador).padBottom(12).row();
@@ -102,13 +82,9 @@ public class EstadisticasScreen implements Screen {
         tabla.add(lblRanking).left().padBottom(20).row();
         tabla.add(separador).padBottom(12).row();
         tabla.add(lblMejoresTiempos).left().padBottom(8).row();
-        tabla.add(tablaTiempos).left().padBottom(15).row();
-        tabla.add(separador2).padBottom(12).row();
-        tabla.add(lblMejoresPuntajes).left().padBottom(8).row();
-        tabla.add(tablaPuntajes).left().padBottom(25).row();
+        tabla.add(tablaTiempos).left().padBottom(25).row();
 
-        // Botón volver
-        TextButton btnVolver = new TextButton("← Volver al menú", skin);
+        TextButton btnVolver = new TextButton(Textos.VOLVER_MENU(), skin);
         tabla.add(btnVolver).width(220).row();
 
         btnVolver.addListener(new ChangeListener() {
@@ -128,15 +104,23 @@ public class EstadisticasScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0.95f, 0.95f, 0.97f, 1f);
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
     }
 
-    @Override public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() { dispose(); }
-    @Override public void dispose() { stage.dispose(); skin.dispose(); }
+    @Override public void resize(int w, int h) { 
+        stage.getViewport().update(w, h, true); 
+    }
+    @Override public void pause(){
+    }
+    @Override public void resume(){
+    }
+    @Override public void hide(){ 
+        dispose(); 
+    }
+    @Override public void dispose(){ 
+        stage.dispose(); skin.dispose(); 
+    }
 }

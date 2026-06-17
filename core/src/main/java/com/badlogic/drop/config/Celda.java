@@ -19,38 +19,38 @@ public class Celda {
     private boolean ocupada;     // true si ya tiene un color asignado 
 
     public Celda(int fila, int columna) {
-        this.fila     = fila;
-        this.columna  = columna;
-        this.color    = VACIA;
-        this.esPunto  = false;
-        this.ocupada  = false;
+        this.fila = fila;
+        this.columna = columna;
+        this.color = VACIA;
+        this.esPunto = false;
+        this.ocupada = false;
     }
 
     public void setColor(int color) {
-        this.color   = color;
+        this.color = color;
         this.ocupada = (color != VACIA);
     }
 
     public void limpiar() {
         if (!esPunto) {
-            this.color   = VACIA;
+            this.color = VACIA;
             this.ocupada = false;
         }
     }
 
     public void marcarComoPunto(int color) {
-        this.color   = color;
+        this.color = color;
         this.esPunto = true;
         this.ocupada = true;
     }
 
-    public int  getFila(){ 
+    public int getFila(){ 
         return fila; 
     }
-    public int  getColumna(){ 
+    public int getColumna(){ 
         return columna; 
     }
-    public int  getColor(){ 
+    public int getColor(){ 
         return color; 
     }
     public boolean isOcupada(){ 

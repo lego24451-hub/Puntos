@@ -2,6 +2,7 @@ package com.badlogic.drop.screens;
 
 import com.badlogic.drop.main.Main;
 import com.badlogic.drop.config.Usuarios;
+import com.badlogic.drop.config.Textos;
 import com.badlogic.drop.archivos.GestorArchivos;
 
 import com.badlogic.gdx.Gdx;
@@ -41,55 +42,63 @@ public class RegistroScreen implements Screen {
         tabla.center();
         stage.addActor(tabla);
 
-        // Título
         Label.LabelStyle estiloTitulo = new Label.LabelStyle();
         estiloTitulo.font = skin.getFont("default-font");
         estiloTitulo.fontColor = new Color(0.32f, 0.29f, 0.72f, 1f);
 
-        Label titulo = new Label("Flow Free Game", estiloTitulo);
+        Label titulo = new Label(Textos.TITULO_JUEGO(), estiloTitulo);
         titulo.setFontScale(1.8f);
-        Label subtitulo = new Label("Crear cuenta", skin);
+        Label subtitulo = new Label(Textos.CREAR_CUENTA(), skin);
 
-        // Campos
         campoNombre = new TextField("", skin);
-        campoNombre.setMessageText("Nombre completo");
+        campoNombre.setMessageText(Textos.NOMBRE_COMPLETO());
 
         campoUsuario = new TextField("", skin);
-        campoUsuario.setMessageText("Nombre de usuario");
+        campoUsuario.setMessageText(Textos.USUARIO());
 
         campoContrasena = new TextField("", skin);
-        campoContrasena.setMessageText("Contraseña (mín. 6 caracteres)");
+        campoContrasena.setMessageText(Textos.CONTRASENA_MIN());
         campoContrasena.setPasswordMode(true);
         campoContrasena.setPasswordCharacter('*');
 
         campoConfirmar = new TextField("", skin);
-        campoConfirmar.setMessageText("Confirmar contraseña");
+        campoConfirmar.setMessageText(Textos.CONFIRMAR());
         campoConfirmar.setPasswordMode(true);
         campoConfirmar.setPasswordCharacter('*');
 
-        // Botones
-        TextButton btnRegistrar = new TextButton("Crear cuenta", skin);
-        TextButton btnVolver = new TextButton("Ya tengo cuenta", skin);
+        final CheckBox chkMostrarPass = new CheckBox(Textos.MOSTRAR_PASSES(), skin);
+
+        TextButton btnRegistrar = new TextButton(Textos.CREAR_CUENTA(), skin);
+        TextButton btnVolver = new TextButton(Textos.YA_TENGO_CUENTA(), skin);
 
         labelError = new Label("", skin);
         labelError.setColor(Color.RED);
 
-        // Layout
         tabla.add(titulo).colspan(2).padBottom(5).row();
         tabla.add(subtitulo).colspan(2).padBottom(30).row();
-        tabla.add(new Label("Nombre completo:", skin)).left().padBottom(5);
+        tabla.add(new Label(Textos.NOMBRE_COMPLETO() + ":", skin)).left().padBottom(5);
         tabla.add(campoNombre).width(300).padBottom(5).row();
-        tabla.add(new Label("Usuario:", skin)).left().padBottom(5);
+        tabla.add(new Label(Textos.USUARIO() + ":", skin)).left().padBottom(5);
         tabla.add(campoUsuario).width(300).padBottom(5).row();
-        tabla.add(new Label("Contraseña:", skin)).left().padBottom(5);
+        tabla.add(new Label(Textos.CONTRASENA() + ":", skin)).left().padBottom(5);
         tabla.add(campoContrasena).width(300).padBottom(5).row();
-        tabla.add(new Label("Confirmar:", skin)).left().padBottom(5);
-        tabla.add(campoConfirmar).width(300).padBottom(20).row();
+        tabla.add(new Label(Textos.CONFIRMAR() + ":", skin)).left().padBottom(5);
+        tabla.add(campoConfirmar).width(300).padBottom(5).row();
+        tabla.add(new Label("", skin)).left();
+        tabla.add(chkMostrarPass).left().padBottom(20).row();
         tabla.add(labelError).colspan(2).padBottom(10).row();
         tabla.add(btnRegistrar).colspan(2).width(300).padBottom(10).row();
         tabla.add(btnVolver).colspan(2).width(300).row();
 
-        // Acciones
+        chkMostrarPass.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                boolean mostrar = chkMostrarPass.isChecked();
+                campoContrasena.setPasswordMode(!mostrar);
+                campoConfirmar.setPasswordMode(!mostrar);
+            }
+        });
+
         btnRegistrar.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
@@ -112,23 +121,22 @@ public class RegistroScreen implements Screen {
         String confirmar = campoConfirmar.getText();
 
         if (nombre.isEmpty() || usuario.isEmpty() || contrasena.isEmpty() || confirmar.isEmpty()) {
-            labelError.setText("Completa todos los campos.");
+            labelError.setText(Textos.ERROR_CAMPOS());
             return;
         }
         if (contrasena.length() < 6) {
-            labelError.setText("La contraseña debe tener al menos 6 caracteres.");
+            labelError.setText(Textos.ERROR_PASS_LEN());
             return;
         }
         if (!contrasena.equals(confirmar)) {
-            labelError.setText("Las contraseñas no coinciden.");
+            labelError.setText(Textos.ERROR_PASS_MATCH());
             return;
         }
         if (GestorArchivos.usuarioExiste(usuario)) {
-            labelError.setText("Ese nombre de usuario ya existe.");
+            labelError.setText(Textos.ERROR_USER_EXISTS());
             return;
         }
 
-        // Crear y guardar usuario
         String hashContrasena = GestorArchivos.hashContrasena(contrasena);
         Usuarios nuevoUsuario = new Usuarios(usuario, hashContrasena, nombre);
         GestorArchivos.guardarUsuario(nuevoUsuario);
@@ -139,15 +147,23 @@ public class RegistroScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0.95f, 0.95f, 0.97f, 1f);
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
     }
 
-    @Override public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() { dispose(); }
-    @Override public void dispose() { stage.dispose(); skin.dispose(); }
+    @Override public void resize(int w, int h) { 
+        stage.getViewport().update(w, h, true); 
+    }
+    @Override public void pause(){
+    }
+    @Override public void resume(){
+    }
+    @Override public void hide(){ 
+        dispose(); 
+    }
+    @Override public void dispose(){
+        stage.dispose(); skin.dispose(); 
+    }
 }

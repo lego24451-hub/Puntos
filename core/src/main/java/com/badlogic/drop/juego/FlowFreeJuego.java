@@ -25,7 +25,7 @@ public class FlowFreeJuego extends Juego {
     }
 
     @Override
-    public void actualizar() {
+    public synchronized void actualizar() { //para que no se creen conflictos
         if (pausado || terminado) return;
 
         tiempoTranscurrido = System.currentTimeMillis() - tiempoInicio;
@@ -49,14 +49,19 @@ public class FlowFreeJuego extends Juego {
         if (vidas > 0){
             vidas--;
             tablero.resetear(nivel);
-            intentos++;
+         intentos++;
+//        if(intentos == 3) { //cuando pasa de 3 el contador se reinicia a 0 
+//          intentos = 0; 
+//        }
             tiempoTranscurrido = 0;
             tiempoInicio = System.currentTimeMillis();
             terminado = false;
             victoria = false;
             
         }
-        else{
+        
+        else if (intentos ==3){
+            intentos = 0; 
             vidas = 0;
             terminado = true;
             victoria = false;

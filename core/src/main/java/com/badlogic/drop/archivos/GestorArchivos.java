@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.io.IOException;
 
 public class GestorArchivos {
     private static final String RUTA_BASE = "usuarios/";
@@ -65,9 +66,24 @@ public static String hashContrasena (String contrasena){
     } catch (NoSuchAlgorithmException e){
         return contrasena;
     }
+} 
+public static long buscarOffsetUsuario(String username) {
+    try (RandomAccessFile raf = new RandomAccessFile("usuarios/indice.dat", "r")) {
+        long totalRegistros = raf.length() / 40; 
+        for (int i = 0; i < totalRegistros; i++) {
+            raf.seek(i * 40L);
+            byte[] nameBytes = new byte[32];
+            raf.read(nameBytes);
+            String nombre = new String(nameBytes).trim();
+            if (nombre.equals(username)) {
+                return raf.readLong();
+            }
+        }
+    } catch (IOException e){}
+    return -1;
 }
 
-public static Usuarios[] cargarTodosLosUsuarios(){
+public static Usuarios[] cargarTodosLosUsuarios(){ // todos los usuarios (rankig, estadisticas globales)
  File carpeta = new File (RUTA_BASE);
  if (!carpeta.exists() || !carpeta.isDirectory()){
      return new Usuarios[0];
